@@ -176,7 +176,9 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
                     </RadioGroup>
                     
                     {/* Campo per inserimento nome per task di pulizia */}
-                    {item.category === 'Pulizia Ambulanza' && (
+                    {(item.category === 'Pulizia Ambulanza Eseguita Da' || 
+                      item.category === 'Carrozzeria' || 
+                      item.category === 'Turno') && (
                       <div className="mb-3">
                         <Label className="text-sm font-medium mb-2 block">Nome:</Label>
                         <Input

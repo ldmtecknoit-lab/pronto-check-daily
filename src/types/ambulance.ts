@@ -92,9 +92,13 @@ export const CHECKLIST_TEMPLATE: Omit<ChecklistItem, 'id' | 'completed'>[] = [
   { category: 'Estintori', description: 'Estintore Vano Guida (controllo 6 mesi)', required: true },
   { category: 'Estintori', description: 'Estintore Vano Sanitario (controllo 6 mesi)', required: true },
   
-  // Pulizia Ambulanza
-  { category: 'Pulizia Ambulanza', description: 'Pulizia Ambulanza Eseguita Da', required: true },
-  { category: 'Pulizia Ambulanza', description: 'Carrozzeria', required: true },
-  { category: 'Pulizia Ambulanza', description: 'Autista', required: true },
-  { category: 'Pulizia Ambulanza', description: 'Soccorritore', required: true },
+  // Pulizia Ambulanza Eseguita Da
+  { category: 'Pulizia Ambulanza Eseguita Da', description: 'Pulizia Ambulanza Eseguita', required: true },
+  
+  // Carrozzeria
+  { category: 'Carrozzeria', description: 'Controllo Carrozzeria', required: true },
+  
+  // Turno
+  { category: 'Turno', description: 'Autista', required: true },
+  { category: 'Turno', description: 'Soccorritore', required: true },
 ];
