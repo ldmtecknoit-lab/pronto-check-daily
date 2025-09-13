@@ -7,6 +7,7 @@ export interface ChecklistItem {
   completed: boolean;
   required: boolean;
   notes?: string;
+  value?: 'si' | 'no' | null;
 }
 
 export interface DailyChecklist {

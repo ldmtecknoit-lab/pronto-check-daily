@@ -36,7 +36,8 @@ export default function Dashboard() {
     const items: ChecklistItem[] = CHECKLIST_TEMPLATE.map((template, index) => ({
       id: `${shift}-${today}-${index}`,
       ...template,
-      completed: false
+      completed: false,
+      value: null
     }));
 
     return {

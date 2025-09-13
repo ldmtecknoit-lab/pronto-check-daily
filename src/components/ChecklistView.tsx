@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Save, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -19,7 +20,12 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
     const newItems = items.map(item => 
-      item.id === itemId ? { ...item, ...updates } : item
+      item.id === itemId ? { 
+        ...item, 
+        ...updates,
+        // Auto-complete item when a value is selected
+        completed: updates.value !== undefined ? updates.value !== null : item.completed
+      } : item
     );
     setItems(newItems);
     
@@ -134,27 +140,45 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
             {categoryItems.map((item) => (
               <div key={item.id} className="border rounded-lg p-4 space-y-3">
                 <div className="flex items-start gap-3">
-                  <Checkbox
-                    checked={item.completed}
-                    onCheckedChange={(checked) => 
-                      updateItem(item.id, { completed: !!checked })
-                    }
-                    className="mt-0.5"
-                  />
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <p className="font-medium">{item.description}</p>
                       {item.required && (
                         <Badge variant="outline" className="text-xs">
                           Obbligatorio
                         </Badge>
                       )}
+                      {item.value && (
+                        <Badge className={item.value === 'si' ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}>
+                          {item.value.toUpperCase()}
+                        </Badge>
+                      )}
                     </div>
+                    
+                    <RadioGroup 
+                      value={item.value || ''} 
+                      onValueChange={(value) => updateItem(item.id, { value: value as 'si' | 'no' })}
+                      className="flex gap-6 mb-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="si" id={`${item.id}-si`} />
+                        <Label htmlFor={`${item.id}-si`} className="text-success font-medium cursor-pointer">
+                          SÌ
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id={`${item.id}-no`} />
+                        <Label htmlFor={`${item.id}-no`} className="text-destructive font-medium cursor-pointer">
+                          NO
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                    
                     <Textarea
                       placeholder="Note aggiuntive (opzionale)"
                       value={item.notes || ''}
                       onChange={(e) => updateItem(item.id, { notes: e.target.value })}
-                      className="mt-2 min-h-[60px]"
+                      className="min-h-[60px]"
                     />
                   </div>
                 </div>
