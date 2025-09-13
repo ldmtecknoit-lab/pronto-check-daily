@@ -8,6 +8,7 @@ export interface ChecklistItem {
   required: boolean;
   notes?: string;
   value?: 'si' | 'no' | null;
+  assignedTo?: string; // For names in cleaning tasks
 }
 
 export interface DailyChecklist {
@@ -90,4 +91,10 @@ export const CHECKLIST_TEMPLATE: Omit<ChecklistItem, 'id' | 'completed'>[] = [
   // Estintori
   { category: 'Estintori', description: 'Estintore Vano Guida (controllo 6 mesi)', required: true },
   { category: 'Estintori', description: 'Estintore Vano Sanitario (controllo 6 mesi)', required: true },
+  
+  // Pulizia Ambulanza
+  { category: 'Pulizia Ambulanza', description: 'Pulizia Ambulanza Eseguita Da', required: true },
+  { category: 'Pulizia Ambulanza', description: 'Carrozzeria', required: true },
+  { category: 'Pulizia Ambulanza', description: 'Autista', required: true },
+  { category: 'Pulizia Ambulanza', description: 'Soccorritore', required: true },
 ];

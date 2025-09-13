@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Save, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -173,6 +174,19 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
                         </Label>
                       </div>
                     </RadioGroup>
+                    
+                    {/* Campo per inserimento nome per task di pulizia */}
+                    {item.category === 'Pulizia Ambulanza' && (
+                      <div className="mb-3">
+                        <Label className="text-sm font-medium mb-2 block">Nome:</Label>
+                        <Input
+                          placeholder="Inserisci nome..."
+                          value={item.assignedTo || ''}
+                          onChange={(e) => updateItem(item.id, { assignedTo: e.target.value })}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
                     
                     <Textarea
                       placeholder="Note aggiuntive (opzionale)"
