@@ -22,9 +22,8 @@ export default function Dashboard() {
   
   // Determine current shift based on time
   const getCurrentShift = (): ShiftType => {
-    if (currentHour >= 6 && currentHour < 14) return 'mattina';
-    if (currentHour >= 14 && currentHour < 22) return 'pomeriggio';
-    return 'sera';
+    if (currentHour >= 8 && currentHour < 20) return 'giorno';
+    return 'notte';
   };
 
   // Get checklist for specific shift and date
@@ -82,9 +81,8 @@ export default function Dashboard() {
 
   // Get today's checklists
   const todaysChecklists = {
-    mattina: getChecklistForShift('mattina'),
-    pomeriggio: getChecklistForShift('pomeriggio'),
-    sera: getChecklistForShift('sera')
+    giorno: getChecklistForShift('giorno'),
+    notte: getChecklistForShift('notte')
   };
 
   const currentShift = getCurrentShift();
@@ -173,7 +171,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Completati oggi</p>
-                <p className="font-semibold">{completedToday}/3 turni</p>
+                <p className="font-semibold">{completedToday}/2 turni</p>
               </div>
             </div>
           </CardContent>
@@ -194,21 +192,16 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ShiftCard
-            shift="mattina"
-            checklist={todaysChecklists.mattina}
-            onStartChecklist={() => handleStartChecklist('mattina')}
+            shift="giorno"
+            checklist={todaysChecklists.giorno}
+            onStartChecklist={() => handleStartChecklist('giorno')}
           />
           <ShiftCard
-            shift="pomeriggio"
-            checklist={todaysChecklists.pomeriggio}
-            onStartChecklist={() => handleStartChecklist('pomeriggio')}
-          />
-          <ShiftCard
-            shift="sera"
-            checklist={todaysChecklists.sera}
-            onStartChecklist={() => handleStartChecklist('sera')}
+            shift="notte"
+            checklist={todaysChecklists.notte}
+            onStartChecklist={() => handleStartChecklist('notte')}
           />
         </div>
       </div>

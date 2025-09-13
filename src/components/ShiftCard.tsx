@@ -11,15 +11,13 @@ interface ShiftCardProps {
 }
 
 const SHIFT_LABELS = {
-  mattina: 'Mattina',
-  pomeriggio: 'Pomeriggio', 
-  sera: 'Sera'
+  giorno: 'Turno Giorno',
+  notte: 'Turno Notte'
 };
 
 const SHIFT_TIMES = {
-  mattina: '06:00 - 14:00',
-  pomeriggio: '14:00 - 22:00',
-  sera: '22:00 - 06:00'
+  giorno: '08:00 - 20:00',
+  notte: '20:00 - 08:00'
 };
 
 export default function ShiftCard({ shift, checklist, onStartChecklist }: ShiftCardProps) {

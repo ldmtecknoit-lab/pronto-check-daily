@@ -1,4 +1,4 @@
-export type ShiftType = 'mattina' | 'pomeriggio' | 'sera';
+export type ShiftType = 'giorno' | 'notte';
 
 export interface ChecklistItem {
   id: string;
@@ -24,32 +24,69 @@ export interface ChecklistHistory {
 }
 
 export const CHECKLIST_TEMPLATE: Omit<ChecklistItem, 'id' | 'completed'>[] = [
-  // Equipaggiamenti di emergenza
-  { category: 'Equipaggiamenti di Emergenza', description: 'Defibrillatore funzionante e carico', required: true },
-  { category: 'Equipaggiamenti di Emergenza', description: 'Bombole ossigeno piene', required: true },
-  { category: 'Equipaggiamenti di Emergenza', description: 'Aspiratore portatile funzionante', required: true },
-  { category: 'Equipaggiamenti di Emergenza', description: 'Monitor parametri vitali', required: true },
-  { category: 'Equipaggiamenti di Emergenza', description: 'Barella principale', required: true },
-  { category: 'Equipaggiamenti di Emergenza', description: 'Barella cucchiaio', required: true },
+  // Vano Guida
+  { category: 'Vano Guida', description: 'Cartellina 118', required: true },
+  { category: 'Vano Guida', description: 'DAE Multiparametrico', required: true },
+  { category: 'Vano Guida', description: 'Tablet', required: true },
+  { category: 'Vano Guida', description: 'Telefono', required: true },
+  { category: 'Vano Guida', description: 'Schede Intervento', required: true },
+  { category: 'Vano Guida', description: 'Tessera DKV', required: true },
+  { category: 'Vano Guida', description: 'Torcia Emergenza', required: true },
+  { category: 'Vano Guida', description: 'Luce', required: true },
+  { category: 'Vano Guida', description: 'Radio RT + Portatile', required: true },
+  { category: 'Vano Guida', description: 'Catene da Neve', required: false },
+  { category: 'Vano Guida', description: 'Estintore', required: true },
+  { category: 'Vano Guida', description: 'Kit Scasso', required: true },
   
-  // Farmaci e materiali sanitari
-  { category: 'Farmaci e Materiali', description: 'Kit farmaci emergenza completo', required: true },
-  { category: 'Farmaci e Materiali', description: 'Materiale per medicazioni', required: true },
-  { category: 'Farmaci e Materiali', description: 'Collari cervicali varie misure', required: true },
-  { category: 'Farmaci e Materiali', description: 'Materiale per immobilizzazione', required: true },
-  { category: 'Farmaci e Materiali', description: 'Kit per accessi venosi', required: true },
+  // Vano Sanitario
+  { category: 'Vano Sanitario', description: 'Cartellina 118', required: true },
+  { category: 'Vano Sanitario', description: 'DAE Multiparametrico', required: true },
+  { category: 'Vano Sanitario', description: 'Tablet', required: true },
+  { category: 'Vano Sanitario', description: 'Telefono', required: true },
+  { category: 'Vano Sanitario', description: 'Schede Intervento', required: true },
+  { category: 'Vano Sanitario', description: 'Tessera DKV', required: true },
+  { category: 'Vano Sanitario', description: 'Torcia Emergenza', required: true },
+  { category: 'Vano Sanitario', description: 'Luce', required: true },
+  { category: 'Vano Sanitario', description: 'Radio RT + Portatile', required: true },
+  { category: 'Vano Sanitario', description: 'Catene da Neve', required: false },
+  { category: 'Vano Sanitario', description: 'Estintore', required: true },
+  { category: 'Vano Sanitario', description: 'Kit Scasso', required: true },
   
-  // Controlli veicolo
-  { category: 'Veicolo', description: 'Livelli fluidi (olio, refrigerante, freni)', required: true },
-  { category: 'Veicolo', description: 'Pneumatici in buono stato', required: true },
-  { category: 'Veicolo', description: 'Sirene e lampeggianti funzionanti', required: true },
-  { category: 'Veicolo', description: 'Radio di comunicazione', required: true },
-  { category: 'Veicolo', description: 'Carburante sufficiente (>75%)', required: true },
-  { category: 'Veicolo', description: 'Kit di emergenza stradale', required: true },
+  // Materiale Sanitario di Consumo
+  { category: 'Materiale Sanitario', description: 'Guanti', required: true },
+  { category: 'Materiale Sanitario', description: 'Cerotto Telato', required: true },
+  { category: 'Materiale Sanitario', description: 'Ovatta', required: true },
+  { category: 'Materiale Sanitario', description: 'Betadine', required: true },
+  { category: 'Materiale Sanitario', description: 'Ghiaccio Istantaneo', required: true },
+  { category: 'Materiale Sanitario', description: 'Garze Sterili', required: true },
+  { category: 'Materiale Sanitario', description: 'Garze Non Sterili', required: true },
+  { category: 'Materiale Sanitario', description: 'Telo Isotermico', required: true },
+  { category: 'Materiale Sanitario', description: 'Stick Glicemici', required: true },
+  { category: 'Materiale Sanitario', description: 'Mascherine O₂', required: true },
+  { category: 'Materiale Sanitario', description: 'Occhialini O₂', required: true },
+  { category: 'Materiale Sanitario', description: 'Maschere Venturi', required: true },
+  { category: 'Materiale Sanitario', description: 'Maschere Reservoir', required: true },
+  { category: 'Materiale Sanitario', description: 'Mascherine FFP2', required: true },
+  { category: 'Materiale Sanitario', description: 'Mascherine Chirurgiche', required: true },
+  { category: 'Materiale Sanitario', description: 'Lenzuolo Monouso', required: true },
+  { category: 'Materiale Sanitario', description: 'Deflussore', required: true },
+  { category: 'Materiale Sanitario', description: 'Sondini Aspirazione', required: true },
+  { category: 'Materiale Sanitario', description: 'Acqua Ossigenata', required: true },
+  { category: 'Materiale Sanitario', description: 'Rotolo di Carta', required: true },
+  { category: 'Materiale Sanitario', description: 'Agocanula', required: true },
+  { category: 'Materiale Sanitario', description: 'Bende Oculari', required: true },
+  { category: 'Materiale Sanitario', description: 'Cannule di Guedel', required: true },
+  { category: 'Materiale Sanitario', description: 'Mefix', required: true },
+  { category: 'Materiale Sanitario', description: 'Garze Tubolari', required: true },
+  { category: 'Materiale Sanitario', description: 'Rasoi Monouso', required: true },
+  { category: 'Materiale Sanitario', description: 'Siringhe Monouso', required: true },
   
-  // Pulizia e igienizzazione
-  { category: 'Pulizia', description: 'Sanificazione interna completata', required: true },
-  { category: 'Pulizia', description: 'Pulizia e disinfezione barelle', required: true },
-  { category: 'Pulizia', description: 'Controllo scorte materiale monouso', required: false },
-  { category: 'Pulizia', description: 'Controllo scorte DPI', required: true },
+  // Ossigeno
+  { category: 'Ossigeno', description: 'Bombola n. 1 (quantità sufficiente)', required: true },
+  { category: 'Ossigeno', description: 'Bombola n. 2 (quantità sufficiente)', required: true },
+  { category: 'Ossigeno', description: 'Bombola Portatile (quantità sufficiente)', required: true },
+  
+  // Estintori
+  { category: 'Estintori', description: 'Estintore Vano Guida (controllo 6 mesi)', required: true },
+  { category: 'Estintori', description: 'Estintore Vano Sanitario (controllo 6 mesi)', required: true },
 ];
