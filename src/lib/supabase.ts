@@ -1,15 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Lovable Supabase integration provides these automatically
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-ref.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key'
-
-if (!supabaseUrl || supabaseUrl === 'https://your-project-ref.supabase.co') {
-  console.error('Supabase URL non configurata. Vai al dashboard Supabase per ottenere le credenziali.')
-}
-
-if (!supabaseAnonKey || supabaseAnonKey === 'your-anon-key') {
-  console.error('Supabase Anon Key non configurata. Vai al dashboard Supabase per ottenere le credenziali.')
-}
+// Configurazione Supabase
+const supabaseUrl = 'https://hgfnqxucvtjkinqyvvrx.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZm5xeHVjdnRqa2lucXl2dnJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4ODE0MzgsImV4cCI6MjA3NDQ1NzQzOH0.UmwcR97iz_srTWurA7J_0awC-IjgTSeQ6xZwg3WndJY'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
