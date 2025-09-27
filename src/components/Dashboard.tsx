@@ -6,6 +6,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import ShiftCard from '@/components/ShiftCard';
 import ChecklistView from '@/components/ChecklistView';
 import HistoryView from '@/components/HistoryView';
+import { CommunicationsPanel } from '@/components/CommunicationsPanel';
 import ambulanceImage from '@/assets/ambulance.jpg';
 import type { DailyChecklist, ChecklistHistory, ShiftType, ChecklistItem } from '@/types/ambulance';
 import { CHECKLIST_TEMPLATE } from '@/types/ambulance';
@@ -111,6 +112,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Communications Panel */}
+      <CommunicationsPanel />
+
       {/* Header */}
       <Card className="bg-gradient-to-r from-primary to-accent text-white">
         <CardContent className="p-6">
