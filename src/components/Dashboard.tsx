@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { History, Ambulance, Calendar } from 'lucide-react';
+import { History, Ambulance, Calendar, Users } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import ShiftCard from '@/components/ShiftCard';
 import ChecklistView from '@/components/ChecklistView';
 import HistoryView from '@/components/HistoryView';
+import WeeklyShifts from '@/components/WeeklyShifts';
 import { CommunicationsPanel } from '@/components/CommunicationsPanel';
 import ambulanceImage from '@/assets/ambulance.jpg';
 import type { DailyChecklist, ChecklistHistory, ShiftType, ChecklistItem } from '@/types/ambulance';
 import { CHECKLIST_TEMPLATE } from '@/types/ambulance';
 
-type ViewMode = 'dashboard' | 'checklist' | 'history';
+type ViewMode = 'dashboard' | 'checklist' | 'history' | 'shifts';
 
 export default function Dashboard() {
   const [currentView, setCurrentView] = useState<ViewMode>('dashboard');
@@ -110,6 +111,12 @@ export default function Dashboard() {
     );
   }
 
+  if (currentView === 'shifts') {
+    return (
+      <WeeklyShifts onBack={() => setCurrentView('dashboard')} />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Communications Panel */}
@@ -187,14 +194,24 @@ export default function Dashboard() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Checklist per Turno</h2>
-          <Button 
-            variant="outline" 
-            onClick={() => setCurrentView('history')}
-            className="gap-2"
-          >
-            <History className="h-4 w-4" />
-            Visualizza Storico
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentView('shifts')}
+              className="gap-2"
+            >
+              <Users className="h-4 w-4" />
+              Turni Settimanali
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentView('history')}
+              className="gap-2"
+            >
+              <History className="h-4 w-4" />
+              Visualizza Storico
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
