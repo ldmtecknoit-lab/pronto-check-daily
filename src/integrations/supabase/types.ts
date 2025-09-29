@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      checklist_items: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          checklist_id: string
+          completed: boolean
+          created_at: string
+          description: string
+          id: string
+          notes: string | null
+          required: boolean
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: string
+          checklist_id: string
+          completed?: boolean
+          created_at?: string
+          description: string
+          id?: string
+          notes?: string | null
+          required?: boolean
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          checklist_id?: string
+          completed?: boolean
+          created_at?: string
+          description?: string
+          id?: string
+          notes?: string | null
+          required?: boolean
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklists: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          date: string
+          id: string
+          shift_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          shift_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          shift_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communications: {
         Row: {
           created_at: string

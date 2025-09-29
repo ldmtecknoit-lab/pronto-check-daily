@@ -8,16 +8,19 @@ import ChecklistView from '@/components/ChecklistView';
 import HistoryView from '@/components/HistoryView';
 import WeeklyShifts from '@/components/WeeklyShifts';
 import { CommunicationsPanel } from '@/components/CommunicationsPanel';
+import { useTodayChecklists, useGetOrCreateChecklist, useUpdateChecklist, useChecklists } from '@/hooks/useChecklists';
 import ambulanceImage from '@/assets/ambulance.jpg';
-import type { DailyChecklist, ChecklistHistory, ShiftType, ChecklistItem } from '@/types/ambulance';
-import { CHECKLIST_TEMPLATE } from '@/types/ambulance';
+import type { DailyChecklist, ShiftType } from '@/types/ambulance';
 
 type ViewMode = 'dashboard' | 'checklist' | 'history' | 'shifts';
 
 export default function Dashboard() {
   const [currentView, setCurrentView] = useState<ViewMode>('dashboard');
   const [selectedChecklist, setSelectedChecklist] = useState<DailyChecklist | null>(null);
-  const [history, setHistory] = useLocalStorage<ChecklistHistory>('ambulance-checklist-history', { checklists: [] });
+  const { data: todayChecklists, isLoading } = useTodayChecklists();
+  const { data: allChecklists } = useChecklists();
+  const { getOrCreateChecklist, isCreating } = useGetOrCreateChecklist();
+  const updateChecklist = useUpdateChecklist();
 
   const today = new Date().toISOString().split('T')[0];
   const currentHour = new Date().getHours();
@@ -30,50 +33,28 @@ export default function Dashboard() {
 
   // Get checklist for specific shift and date
   const getChecklistForShift = (shift: ShiftType, date: string = today): DailyChecklist | undefined => {
-    return history.checklists.find(cl => cl.shift === shift && cl.date === date);
-  };
-
-  // Create new checklist for shift
-  const createChecklistForShift = (shift: ShiftType): DailyChecklist => {
-    const items: ChecklistItem[] = CHECKLIST_TEMPLATE.map((template, index) => ({
-      id: `${shift}-${today}-${index}`,
-      ...template,
-      completed: false,
-      value: null
-    }));
-
-    return {
-      id: `${shift}-${today}`,
-      date: today,
-      shift,
-      items,
-      status: 'pending'
-    };
+    return todayChecklists?.find(cl => cl.shift === shift && cl.date === date);
   };
 
   // Handle starting/continuing a checklist
-  const handleStartChecklist = (shift: ShiftType) => {
-    let checklist = getChecklistForShift(shift);
-    
-    if (!checklist) {
-      checklist = createChecklistForShift(shift);
-      setHistory(prev => ({
-        checklists: [...prev.checklists, checklist]
-      }));
+  const handleStartChecklist = async (shift: ShiftType) => {
+    try {
+      const checklist = await getOrCreateChecklist(shift);
+      setSelectedChecklist(checklist);
+      setCurrentView('checklist');
+    } catch (error) {
+      console.error('Error creating/getting checklist:', error);
     }
-    
-    setSelectedChecklist(checklist);
-    setCurrentView('checklist');
   };
 
   // Handle updating checklist
-  const handleUpdateChecklist = (updatedChecklist: DailyChecklist) => {
-    setHistory(prev => ({
-      checklists: prev.checklists.map(cl => 
-        cl.id === updatedChecklist.id ? updatedChecklist : cl
-      )
-    }));
-    setSelectedChecklist(updatedChecklist);
+  const handleUpdateChecklist = async (updatedChecklist: DailyChecklist) => {
+    try {
+      await updateChecklist.mutateAsync(updatedChecklist);
+      setSelectedChecklist(updatedChecklist);
+    } catch (error) {
+      console.error('Error updating checklist:', error);
+    }
   };
 
   // Handle viewing checklist from history
@@ -104,7 +85,7 @@ export default function Dashboard() {
   if (currentView === 'history') {
     return (
       <HistoryView
-        history={history.checklists}
+        history={allChecklists || []}
         onBack={() => setCurrentView('dashboard')}
         onViewChecklist={handleViewFromHistory}
       />
@@ -219,11 +200,13 @@ export default function Dashboard() {
             shift="giorno"
             checklist={todaysChecklists.giorno}
             onStartChecklist={() => handleStartChecklist('giorno')}
+            isLoading={isCreating}
           />
           <ShiftCard
             shift="notte"
             checklist={todaysChecklists.notte}
             onStartChecklist={() => handleStartChecklist('notte')}
+            isLoading={isCreating}
           />
         </div>
       </div>
@@ -242,9 +225,10 @@ export default function Dashboard() {
             <Button 
               onClick={() => handleStartChecklist(currentShift)}
               className="gap-2"
+              disabled={isCreating}
             >
               <Ambulance className="h-4 w-4" />
-              Inizia Checklist {currentShift}
+              {isCreating ? 'Creazione...' : `Inizia Checklist ${currentShift}`}
             </Button>
           </CardContent>
         </Card>

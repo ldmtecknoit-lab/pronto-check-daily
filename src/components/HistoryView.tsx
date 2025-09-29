@@ -11,9 +11,8 @@ interface HistoryViewProps {
 }
 
 const SHIFT_LABELS = {
-  mattina: 'Mattina',
-  pomeriggio: 'Pomeriggio',
-  sera: 'Sera'
+  giorno: 'Turno Giorno',
+  notte: 'Turno Notte'
 };
 
 export default function HistoryView({ history, onBack, onViewChecklist }: HistoryViewProps) {
@@ -98,7 +97,7 @@ export default function HistoryView({ history, onBack, onViewChecklist }: Histor
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-semibold text-lg">
-                        {SHIFT_LABELS[checklist.shift]}
+                        {SHIFT_LABELS[checklist.shift as keyof typeof SHIFT_LABELS] || checklist.shift}
                       </h3>
                       {getStatusBadge(checklist.status)}
                     </div>

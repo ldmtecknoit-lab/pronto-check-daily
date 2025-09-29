@@ -8,6 +8,7 @@ interface ShiftCardProps {
   shift: ShiftType;
   checklist?: DailyChecklist;
   onStartChecklist: () => void;
+  isLoading?: boolean;
 }
 
 const SHIFT_LABELS = {
@@ -20,7 +21,7 @@ const SHIFT_TIMES = {
   notte: '20:00 - 08:00'
 };
 
-export default function ShiftCard({ shift, checklist, onStartChecklist }: ShiftCardProps) {
+export default function ShiftCard({ shift, checklist, onStartChecklist, isLoading = false }: ShiftCardProps) {
   const getStatusColor = () => {
     if (!checklist) return 'border-muted';
     switch (checklist.status) {
@@ -91,9 +92,10 @@ export default function ShiftCard({ shift, checklist, onStartChecklist }: ShiftC
           onClick={onStartChecklist}
           className="w-full"
           variant={checklist?.status === 'completed' ? 'outline' : 'default'}
+          disabled={isLoading}
         >
           <Play className="h-4 w-4 mr-2" />
-          {checklist?.status === 'completed' ? 'Rivedi' : checklist ? 'Continua' : 'Inizia'} Checklist
+          {isLoading ? 'Caricamento...' : checklist?.status === 'completed' ? 'Rivedi' : checklist ? 'Continua' : 'Inizia'} Checklist
         </Button>
       </CardContent>
     </Card>
