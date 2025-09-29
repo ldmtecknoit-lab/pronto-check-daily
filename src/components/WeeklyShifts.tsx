@@ -9,10 +9,13 @@ import {
   Phone, 
   Mail,
   ChevronLeft,
-  ChevronRight 
+  ChevronRight,
+  Loader2,
+  AlertCircle 
 } from 'lucide-react';
 import { useState } from 'react';
-import { generateWeeklyShifts, type WeeklyShift, type Operator } from '@/types/shifts';
+import { useWeeklyShifts, useOperators, type Operator } from '@/hooks/useShifts';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface WeeklyShiftsProps {
   onBack?: () => void;
@@ -20,7 +23,8 @@ interface WeeklyShiftsProps {
 
 export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
-  const [weeklyShifts] = useState<WeeklyShift[]>(() => generateWeeklyShifts());
+  const { data: weeklyShifts, isLoading, error } = useWeeklyShifts(currentWeekOffset);
+  const { data: operators } = useOperators();
 
   const getWeekRange = () => {
     const today = new Date();
@@ -57,6 +61,27 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
   };
 
   const { start, end } = getWeekRange();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert className="mx-auto max-w-md">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Errore nel caricamento dei turni: {error.message}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!weeklyShifts) return null;
 
   return (
     <div className="space-y-6">
@@ -159,39 +184,43 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
                 <h3 className="font-semibold text-yellow-800 mb-3 flex items-center gap-2">
                   ☀️ Turno Giorno (08:00 - 20:00)
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {getRoleIcon(dayShift.shifts.giorno.autista.role)}
-                      <span className="font-medium">{dayShift.shifts.giorno.autista.name}</span>
-                      <Badge className={getRoleBadgeVariant(dayShift.shifts.giorno.autista.role)}>
-                        Autista
-                      </Badge>
-                    </div>
-                    {dayShift.shifts.giorno.autista.phone && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="h-3 w-3" />
-                        {dayShift.shifts.giorno.autista.phone}
+                {dayShift.shifts.giorno ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        {getRoleIcon(dayShift.shifts.giorno.autista.role)}
+                        <span className="font-medium">{dayShift.shifts.giorno.autista.name}</span>
+                        <Badge className={getRoleBadgeVariant(dayShift.shifts.giorno.autista.role)}>
+                          Autista
+                        </Badge>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {getRoleIcon(dayShift.shifts.giorno.soccorritore.role)}
-                      <span className="font-medium">{dayShift.shifts.giorno.soccorritore.name}</span>
-                      <Badge className={getRoleBadgeVariant(dayShift.shifts.giorno.soccorritore.role)}>
-                        Soccorritore
-                      </Badge>
+                      {dayShift.shifts.giorno.autista.phone && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Phone className="h-3 w-3" />
+                          {dayShift.shifts.giorno.autista.phone}
+                        </div>
+                      )}
                     </div>
-                    {dayShift.shifts.giorno.soccorritore.phone && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="h-3 w-3" />
-                        {dayShift.shifts.giorno.soccorritore.phone}
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        {getRoleIcon(dayShift.shifts.giorno.soccorritore.role)}
+                        <span className="font-medium">{dayShift.shifts.giorno.soccorritore.name}</span>
+                        <Badge className={getRoleBadgeVariant(dayShift.shifts.giorno.soccorritore.role)}>
+                          Soccorritore
+                        </Badge>
                       </div>
-                    )}
+                      {dayShift.shifts.giorno.soccorritore.phone && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Phone className="h-3 w-3" />
+                          {dayShift.shifts.giorno.soccorritore.phone}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <p className="text-yellow-700 italic">Nessun turno assegnato</p>
+                )}
               </div>
 
               {/* Turno Notte */}
@@ -199,39 +228,43 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
                 <h3 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
                   🌙 Turno Notte (20:00 - 08:00)
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {getRoleIcon(dayShift.shifts.notte.autista.role)}
-                      <span className="font-medium">{dayShift.shifts.notte.autista.name}</span>
-                      <Badge className={getRoleBadgeVariant(dayShift.shifts.notte.autista.role)}>
-                        Autista
-                      </Badge>
-                    </div>
-                    {dayShift.shifts.notte.autista.phone && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="h-3 w-3" />
-                        {dayShift.shifts.notte.autista.phone}
+                {dayShift.shifts.notte ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        {getRoleIcon(dayShift.shifts.notte.autista.role)}
+                        <span className="font-medium">{dayShift.shifts.notte.autista.name}</span>
+                        <Badge className={getRoleBadgeVariant(dayShift.shifts.notte.autista.role)}>
+                          Autista
+                        </Badge>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {getRoleIcon(dayShift.shifts.notte.soccorritore.role)}
-                      <span className="font-medium">{dayShift.shifts.notte.soccorritore.name}</span>
-                      <Badge className={getRoleBadgeVariant(dayShift.shifts.notte.soccorritore.role)}>
-                        Soccorritore
-                      </Badge>
+                      {dayShift.shifts.notte.autista.phone && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Phone className="h-3 w-3" />
+                          {dayShift.shifts.notte.autista.phone}
+                        </div>
+                      )}
                     </div>
-                    {dayShift.shifts.notte.soccorritore.phone && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="h-3 w-3" />
-                        {dayShift.shifts.notte.soccorritore.phone}
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        {getRoleIcon(dayShift.shifts.notte.soccorritore.role)}
+                        <span className="font-medium">{dayShift.shifts.notte.soccorritore.name}</span>
+                        <Badge className={getRoleBadgeVariant(dayShift.shifts.notte.soccorritore.role)}>
+                          Soccorritore
+                        </Badge>
                       </div>
-                    )}
+                      {dayShift.shifts.notte.soccorritore.phone && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Phone className="h-3 w-3" />
+                          {dayShift.shifts.notte.soccorritore.phone}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <p className="text-blue-700 italic">Nessun turno assegnato</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -243,7 +276,7 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
         <Card>
           <CardContent className="p-4 text-center">
             <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <p className="text-2xl font-bold">14</p>
+            <p className="text-2xl font-bold">{operators?.length || 0}</p>
             <p className="text-sm text-muted-foreground">Operatori totali</p>
           </CardContent>
         </Card>
@@ -251,7 +284,7 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
         <Card>
           <CardContent className="p-4 text-center">
             <Car className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-            <p className="text-2xl font-bold">7</p>
+            <p className="text-2xl font-bold">{operators?.filter(op => op.role === 'autista').length || 0}</p>
             <p className="text-sm text-muted-foreground">Autisti</p>
           </CardContent>
         </Card>
@@ -259,7 +292,7 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
         <Card>
           <CardContent className="p-4 text-center">
             <Heart className="h-8 w-8 mx-auto mb-2 text-red-600" />
-            <p className="text-2xl font-bold">7</p>
+            <p className="text-2xl font-bold">{operators?.filter(op => op.role === 'soccorritore').length || 0}</p>
             <p className="text-sm text-muted-foreground">Soccorritori</p>
           </CardContent>
         </Card>

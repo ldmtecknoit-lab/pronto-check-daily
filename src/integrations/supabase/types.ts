@@ -50,6 +50,84 @@ export type Database = {
         }
         Relationships: []
       }
+      operators: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shifts: {
+        Row: {
+          autista_id: string
+          created_at: string
+          date: string
+          id: string
+          shift_type: string
+          soccorritore_id: string
+          updated_at: string
+        }
+        Insert: {
+          autista_id: string
+          created_at?: string
+          date: string
+          id?: string
+          shift_type: string
+          soccorritore_id: string
+          updated_at?: string
+        }
+        Update: {
+          autista_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          shift_type?: string
+          soccorritore_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_autista_id_fkey"
+            columns: ["autista_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_soccorritore_id_fkey"
+            columns: ["soccorritore_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
