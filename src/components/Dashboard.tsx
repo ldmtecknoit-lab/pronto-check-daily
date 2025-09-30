@@ -60,42 +60,45 @@ export default function Dashboard() {
 
   // Handle viewing checklist from history
   const handleViewFromHistory = async (checklist: DailyChecklist) => {
-    // Force refresh the checklist data to ensure items are loaded
     try {
-      const { data: freshData } = await supabase
-        .from('checklists')
-        .select(`
-          *,
-          checklist_items (*)
-        `)
-        .eq('id', checklist.id)
-        .single();
+      const [{ data: freshChecklist }, { data: items }] = await Promise.all([
+        supabase
+          .from('checklists')
+          .select('*')
+          .eq('id', checklist.id)
+          .maybeSingle(),
+        supabase
+          .from('checklist_items')
+          .select('*')
+          .eq('checklist_id', checklist.id)
+          .order('created_at', { ascending: true }),
+      ]);
 
-      if (freshData) {
-        const freshChecklist: DailyChecklist = {
-          id: freshData.id,
-          date: freshData.date,
-          shift: freshData.shift_type as ShiftType,
-          status: freshData.status as 'completed' | 'partial' | 'pending',
-          completedAt: freshData.completed_at,
-          completedBy: freshData.completed_by,
-          items: freshData.checklist_items.map((item: any) => ({
+      if (freshChecklist) {
+        const combined: DailyChecklist = {
+          id: freshChecklist.id,
+          date: freshChecklist.date,
+          shift: freshChecklist.shift_type as ShiftType,
+          status: freshChecklist.status as 'completed' | 'partial' | 'pending',
+          completedAt: freshChecklist.completed_at,
+          completedBy: freshChecklist.completed_by,
+          items: (items ?? []).map((item: any) => ({
             id: item.id,
             category: item.category,
             description: item.description,
             completed: item.completed,
             required: item.required,
             notes: item.notes,
-            value: item.value as 'si' | 'no' | null,
-            assignedTo: item.assigned_to
-          }))
+            value: (item.value as 'si' | 'no' | null) ?? null,
+            assignedTo: item.assigned_to,
+          })),
         };
-        setSelectedChecklist(freshChecklist);
+        setSelectedChecklist(combined);
       } else {
         setSelectedChecklist(checklist);
       }
     } catch (error) {
-      console.error('Error fetching fresh checklist data:', error);
+      console.error('Error fetching checklist and items:', error);
       setSelectedChecklist(checklist);
     }
     setCurrentView('checklist');
