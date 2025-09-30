@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { History, Ambulance, Calendar, Users } from 'lucide-react';
@@ -58,8 +59,45 @@ export default function Dashboard() {
   };
 
   // Handle viewing checklist from history
-  const handleViewFromHistory = (checklist: DailyChecklist) => {
-    setSelectedChecklist(checklist);
+  const handleViewFromHistory = async (checklist: DailyChecklist) => {
+    // Force refresh the checklist data to ensure items are loaded
+    try {
+      const { data: freshData } = await supabase
+        .from('checklists')
+        .select(`
+          *,
+          checklist_items (*)
+        `)
+        .eq('id', checklist.id)
+        .single();
+
+      if (freshData) {
+        const freshChecklist: DailyChecklist = {
+          id: freshData.id,
+          date: freshData.date,
+          shift: freshData.shift_type as ShiftType,
+          status: freshData.status as 'completed' | 'partial' | 'pending',
+          completedAt: freshData.completed_at,
+          completedBy: freshData.completed_by,
+          items: freshData.checklist_items.map((item: any) => ({
+            id: item.id,
+            category: item.category,
+            description: item.description,
+            completed: item.completed,
+            required: item.required,
+            notes: item.notes,
+            value: item.value as 'si' | 'no' | null,
+            assignedTo: item.assigned_to
+          }))
+        };
+        setSelectedChecklist(freshChecklist);
+      } else {
+        setSelectedChecklist(checklist);
+      }
+    } catch (error) {
+      console.error('Error fetching fresh checklist data:', error);
+      setSelectedChecklist(checklist);
+    }
     setCurrentView('checklist');
   };
 
