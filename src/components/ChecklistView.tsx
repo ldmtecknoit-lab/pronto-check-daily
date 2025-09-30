@@ -95,7 +95,7 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
   }, {} as Record<string, ChecklistItem[]>);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
@@ -204,7 +204,7 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
         </Card>
       ))}
 
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-4 pb-6">
         <Button 
           onClick={saveAndComplete}
           disabled={completedRequired < requiredCount}
