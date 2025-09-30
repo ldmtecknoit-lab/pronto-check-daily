@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -18,6 +18,11 @@ interface ChecklistViewProps {
 
 export default function ChecklistView({ checklist, onUpdate, onBack }: ChecklistViewProps) {
   const [items, setItems] = useState<ChecklistItem[]>(checklist.items);
+
+  // Sync items when checklist changes
+  useEffect(() => {
+    setItems(checklist.items);
+  }, [checklist]);
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
     const newItems = items.map(item => 
@@ -50,6 +55,20 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
     };
 
     onUpdate(updatedChecklist);
+  };
+
+  const saveDraft = () => {
+    const draftChecklist: DailyChecklist = {
+      ...checklist,
+      items,
+      status: completedCount > 0 ? 'partial' : 'pending'
+    };
+
+    onUpdate(draftChecklist);
+    toast({
+      title: "Bozza salvata",
+      description: "Le modifiche sono state salvate correttamente.",
+    });
   };
 
   const saveAndComplete = () => {
@@ -213,7 +232,7 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
           <CheckCircle className="h-4 w-4 mr-2" />
           Completa Checklist
         </Button>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={saveDraft}>
           <Save className="h-4 w-4" />
           Salva Bozza
         </Button>
