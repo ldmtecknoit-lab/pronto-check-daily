@@ -30,42 +30,54 @@ export const useChecklists = (startDate?: string, endDate?: string) => {
   return useQuery({
     queryKey: ['checklists', startDate, endDate],
     queryFn: async () => {
-      let query = supabase
+      // Fetch checklists first (no nested select to avoid FK dependency)
+      let checklistQuery = supabase
         .from('checklists')
-        .select(`
-          *,
-          checklist_items (*)
-        `)
+        .select('*')
         .order('date', { ascending: false });
 
-      if (startDate) {
-        query = query.gte('date', startDate);
+      if (startDate) checklistQuery = checklistQuery.gte('date', startDate);
+      if (endDate) checklistQuery = checklistQuery.lte('date', endDate);
+
+      const { data: checklistRows, error: checklistError } = await checklistQuery;
+      if (checklistError) throw checklistError;
+
+      const ids = (checklistRows ?? []).map((c: any) => c.id);
+
+      // Fetch all items for these checklists in one query
+      let itemsByChecklist: Record<string, any[]> = {};
+      if (ids.length > 0) {
+        const { data: itemRows, error: itemsError } = await supabase
+          .from('checklist_items')
+          .select('*')
+          .in('checklist_id', ids)
+          .order('created_at', { ascending: true });
+        if (itemsError) throw itemsError;
+
+        itemsByChecklist = (itemRows ?? []).reduce((acc: Record<string, any[]>, row: any) => {
+          acc[row.checklist_id] = acc[row.checklist_id] || [];
+          acc[row.checklist_id].push(row);
+          return acc;
+        }, {});
       }
-      if (endDate) {
-        query = query.lte('date', endDate);
-      }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      // Transform data to match the existing DailyChecklist interface
-      const checklists: DailyChecklist[] = (data as any[])?.map(item => ({
+      // Transform data to DailyChecklist
+      const checklists: DailyChecklist[] = (checklistRows as any[])?.map(item => ({
         id: item.id,
         date: item.date,
         shift: item.shift_type as ShiftType,
         status: item.status,
         completedAt: item.completed_at,
         completedBy: item.completed_by,
-        items: item.checklist_items.map((checklistItem: any) => ({
+        items: (itemsByChecklist[item.id] || []).map((checklistItem: any) => ({
           id: checklistItem.id,
           category: checklistItem.category,
           description: checklistItem.description,
           completed: checklistItem.completed,
           required: checklistItem.required,
-          notes: checklistItem.notes,
-          value: checklistItem.value as 'si' | 'no' | null,
-          assignedTo: checklistItem.assigned_to
+          notes: checklistItem.notes ?? undefined,
+          value: (checklistItem.value as 'si' | 'no' | null) ?? null,
+          assignedTo: checklistItem.assigned_to ?? undefined,
         }))
       })) || [];
 
@@ -167,18 +179,34 @@ export const useUpdateChecklist = () => {
 
       if (checklistError) throw checklistError;
 
-      // Update checklist items
+      // Update checklist items with fallback when ID is temporary
       for (const item of validatedItems) {
-        const { error: itemError } = await supabase
-          .from('checklist_items')
-          .update({
-            completed: item.completed,
-            notes: item.notes,
-            value: item.value,
-            assigned_to: item.assigned_to,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', item.id);
+        const updatePayload = {
+          completed: item.completed,
+          notes: item.notes,
+          value: item.value,
+          assigned_to: item.assigned_to,
+          updated_at: new Date().toISOString()
+        } as const;
+
+        const isUuid = typeof item.id === 'string' && /^[0-9a-fA-F-]{36}$/.test(item.id);
+
+        let itemError;
+        if (isUuid) {
+          const { error } = await supabase
+            .from('checklist_items')
+            .update(updatePayload)
+            .eq('id', item.id);
+          itemError = error;
+        } else {
+          const { error } = await supabase
+            .from('checklist_items')
+            .update(updatePayload)
+            .eq('checklist_id', checklist.id)
+            .eq('category', item.category)
+            .eq('description', item.description);
+          itemError = error;
+        }
 
         if (itemError) throw itemError;
       }
@@ -204,24 +232,36 @@ export const useGetOrCreateChecklist = () => {
       return existingChecklist;
     }
 
-    // Create new checklist
-    const checklistId = await createChecklist.mutateAsync({ shift, date });
-    
-    // Return the newly created checklist
-    const newItems: ChecklistItem[] = CHECKLIST_TEMPLATE.map((template, index) => ({
-      id: `${shift}-${date}-${index}`, // Temporary ID until we get the real ones
-      ...template,
-      completed: false,
-      value: null
-    }));
+  // Create new checklist
+  const checklistId = await createChecklist.mutateAsync({ shift, date });
+  
+  // Fetch the real items for this checklist so we have correct IDs
+  const { data: dbItems, error: fetchItemsError } = await supabase
+    .from('checklist_items')
+    .select('*')
+    .eq('checklist_id', checklistId)
+    .order('created_at', { ascending: true });
 
-    return {
-      id: checklistId,
-      date,
-      shift,
-      items: newItems,
-      status: 'pending'
-    };
+  if (fetchItemsError) throw fetchItemsError;
+
+  const items: ChecklistItem[] = (dbItems ?? []).map((row: any) => ({
+    id: row.id,
+    category: row.category,
+    description: row.description,
+    completed: row.completed,
+    required: row.required,
+    notes: row.notes ?? undefined,
+    value: (row.value as 'si' | 'no' | null) ?? null,
+    assignedTo: row.assigned_to ?? undefined,
+  }));
+
+  return {
+    id: checklistId,
+    date,
+    shift,
+    items,
+    status: 'pending'
+  };
   };
 
   return { getOrCreateChecklist, isCreating: createChecklist.isPending };
