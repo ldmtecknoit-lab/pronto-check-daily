@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -6,72 +6,63 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Save, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { DailyChecklist, ChecklistItem } from '@/types/ambulance';
 
 interface ChecklistViewProps {
   checklist: DailyChecklist;
-  onUpdate: (checklist: DailyChecklist) => void;
+  onSave: (checklist: DailyChecklist) => Promise<void>;
   onBack: () => void;
+  isSaving: boolean;
 }
 
-export default function ChecklistView({ checklist, onUpdate, onBack }: ChecklistViewProps) {
+export default function ChecklistView({ checklist, onSave, onBack, isSaving }: ChecklistViewProps) {
   const [items, setItems] = useState<ChecklistItem[]>(checklist.items);
 
-  // Sync items when checklist changes
-  useEffect(() => {
-    setItems(checklist.items);
-  }, [checklist]);
-
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
-    const newItems = items.map(item => 
-      item.id === itemId ? { 
-        ...item, 
-        ...updates,
-        // Auto-complete item when a value is selected
-        completed: updates.value !== undefined ? updates.value !== null : item.completed
-      } : item
+    setItems(prevItems => 
+      prevItems.map(item => 
+        item.id === itemId ? { 
+          ...item, 
+          ...updates,
+          // Auto-complete when a value is selected
+          completed: updates.value !== undefined ? updates.value !== null : item.completed
+        } : item
+      )
     );
-    setItems(newItems);
-    
-    // Auto-save
-    const completedCount = newItems.filter(item => item.completed).length;
-    const totalRequired = newItems.filter(item => item.required).length;
-    const completedRequired = newItems.filter(item => item.required && item.completed).length;
-    
-    let status: DailyChecklist['status'] = 'pending';
-    if (completedRequired === totalRequired && completedCount === newItems.length) {
-      status = 'completed';
-    } else if (completedCount > 0) {
-      status = 'partial';
-    }
-
-    const updatedChecklist: DailyChecklist = {
-      ...checklist,
-      items: newItems,
-      status,
-      completedAt: status === 'completed' ? new Date().toISOString() : undefined
-    };
-
-    onUpdate(updatedChecklist);
   };
 
-  const saveDraft = () => {
-    const draftChecklist: DailyChecklist = {
+  const calculateStatus = (): DailyChecklist['status'] => {
+    const completedCount = items.filter(item => item.completed).length;
+    const totalRequired = items.filter(item => item.required).length;
+    const completedRequired = items.filter(item => item.required && item.completed).length;
+    
+    if (completedRequired === totalRequired && completedCount === items.length) {
+      return 'completed';
+    } else if (completedCount > 0) {
+      return 'partial';
+    }
+    return 'pending';
+  };
+
+  const handleSave = async () => {
+    const status = calculateStatus();
+    const updatedChecklist: DailyChecklist = {
       ...checklist,
       items,
-      status: completedCount > 0 ? 'partial' : 'pending'
+      status
     };
 
-    onUpdate(draftChecklist);
+    await onSave(updatedChecklist);
+    
     toast({
-      title: "Bozza salvata",
-      description: "Le modifiche sono state salvate correttamente.",
+      title: "Salvato",
+      description: "Le modifiche sono state salvate sul database.",
     });
   };
 
-  const saveAndComplete = () => {
+  const handleComplete = async () => {
     const requiredItems = items.filter(item => item.required);
     const completedRequired = requiredItems.filter(item => item.completed);
     
@@ -88,14 +79,17 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
       ...checklist,
       items,
       status: 'completed',
-      completedAt: new Date().toISOString()
+      completedAt: new Date().toISOString(),
+      completedBy: 'Operatore'
     };
 
-    onUpdate(completedChecklist);
+    await onSave(completedChecklist);
+    
     toast({
       title: "Checklist completata!",
-      description: "Tutti i controlli sono stati salvati correttamente.",
+      description: "Tutti i controlli sono stati salvati.",
     });
+    
     onBack();
   };
 
@@ -223,18 +217,23 @@ export default function ChecklistView({ checklist, onUpdate, onBack }: Checklist
         </Card>
       ))}
 
-      <div className="flex gap-3 pt-4 pb-6">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex gap-3">
         <Button 
-          onClick={saveAndComplete}
-          disabled={completedRequired < requiredCount}
+          onClick={handleComplete}
+          disabled={completedRequired < requiredCount || isSaving}
           className="flex-1 bg-success text-success-foreground hover:bg-success/90"
         >
           <CheckCircle className="h-4 w-4 mr-2" />
-          Completa Checklist
+          {isSaving ? 'Salvataggio...' : 'Completa Checklist'}
         </Button>
-        <Button variant="outline" className="gap-2" onClick={saveDraft}>
+        <Button 
+          variant="outline" 
+          className="gap-2" 
+          onClick={handleSave}
+          disabled={isSaving}
+        >
           <Save className="h-4 w-4" />
-          Salva Bozza
+          {isSaving ? 'Salvataggio...' : 'Salva'}
         </Button>
       </div>
     </div>

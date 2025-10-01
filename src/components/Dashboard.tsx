@@ -1,15 +1,13 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { History, Ambulance, Calendar, Users } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
 import ShiftCard from '@/components/ShiftCard';
 import ChecklistView from '@/components/ChecklistView';
 import HistoryView from '@/components/HistoryView';
 import WeeklyShifts from '@/components/WeeklyShifts';
 import { CommunicationsPanel } from '@/components/CommunicationsPanel';
-import { useTodayChecklists, useGetOrCreateChecklist, useUpdateChecklist, useChecklists } from '@/hooks/useChecklists';
+import { useTodayChecklists, useGetOrCreateChecklist, useUpdateChecklist, useChecklists, useChecklist } from '@/hooks/useChecklists';
 import ambulanceImage from '@/assets/ambulance.jpg';
 import type { DailyChecklist, ShiftType } from '@/types/ambulance';
 
@@ -17,90 +15,41 @@ type ViewMode = 'dashboard' | 'checklist' | 'history' | 'shifts';
 
 export default function Dashboard() {
   const [currentView, setCurrentView] = useState<ViewMode>('dashboard');
-  const [selectedChecklist, setSelectedChecklist] = useState<DailyChecklist | null>(null);
-  const { data: todayChecklists, isLoading } = useTodayChecklists();
+  const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
+  const { data: todayChecklists } = useTodayChecklists();
   const { data: allChecklists } = useChecklists();
+  const { data: currentChecklist } = useChecklist(selectedChecklistId);
   const { getOrCreateChecklist, isCreating } = useGetOrCreateChecklist();
   const updateChecklist = useUpdateChecklist();
 
   const today = new Date().toISOString().split('T')[0];
   const currentHour = new Date().getHours();
   
-  // Determine current shift based on time
   const getCurrentShift = (): ShiftType => {
     if (currentHour >= 8 && currentHour < 20) return 'giorno';
     return 'notte';
   };
 
-  // Get checklist for specific shift and date
   const getChecklistForShift = (shift: ShiftType, date: string = today): DailyChecklist | undefined => {
     return todayChecklists?.find(cl => cl.shift === shift && cl.date === date);
   };
 
-  // Handle starting/continuing a checklist
   const handleStartChecklist = async (shift: ShiftType) => {
     try {
-      const checklist = await getOrCreateChecklist(shift);
-      setSelectedChecklist(checklist);
+      const checklistId = await getOrCreateChecklist(shift);
+      setSelectedChecklistId(checklistId);
       setCurrentView('checklist');
     } catch (error) {
       console.error('Error creating/getting checklist:', error);
     }
   };
 
-  // Handle updating checklist
-  const handleUpdateChecklist = async (updatedChecklist: DailyChecklist) => {
-    try {
-      await updateChecklist.mutateAsync(updatedChecklist);
-      setSelectedChecklist(updatedChecklist);
-    } catch (error) {
-      console.error('Error updating checklist:', error);
-    }
+  const handleSaveChecklist = async (updatedChecklist: DailyChecklist) => {
+    await updateChecklist.mutateAsync(updatedChecklist);
   };
 
-  // Handle viewing checklist from history
-  const handleViewFromHistory = async (checklist: DailyChecklist) => {
-    try {
-      const [{ data: freshChecklist }, { data: items }] = await Promise.all([
-        supabase
-          .from('checklists')
-          .select('*')
-          .eq('id', checklist.id)
-          .maybeSingle(),
-        supabase
-          .from('checklist_items')
-          .select('*')
-          .eq('checklist_id', checklist.id)
-          .order('created_at', { ascending: true }),
-      ]);
-
-      if (freshChecklist) {
-        const combined: DailyChecklist = {
-          id: freshChecklist.id,
-          date: freshChecklist.date,
-          shift: freshChecklist.shift_type as ShiftType,
-          status: freshChecklist.status as 'completed' | 'partial' | 'pending',
-          completedAt: freshChecklist.completed_at,
-          completedBy: freshChecklist.completed_by,
-          items: (items ?? []).map((item: any) => ({
-            id: item.id,
-            category: item.category,
-            description: item.description,
-            completed: item.completed,
-            required: item.required,
-            notes: item.notes,
-            value: (item.value as 'si' | 'no' | null) ?? null,
-            assignedTo: item.assigned_to,
-          })),
-        };
-        setSelectedChecklist(combined);
-      } else {
-        setSelectedChecklist(checklist);
-      }
-    } catch (error) {
-      console.error('Error fetching checklist and items:', error);
-      setSelectedChecklist(checklist);
-    }
+  const handleViewFromHistory = (checklist: DailyChecklist) => {
+    setSelectedChecklistId(checklist.id);
     setCurrentView('checklist');
   };
 
@@ -113,12 +62,16 @@ export default function Dashboard() {
   const currentShift = getCurrentShift();
   const completedToday = Object.values(todaysChecklists).filter(cl => cl?.status === 'completed').length;
 
-  if (currentView === 'checklist' && selectedChecklist) {
+  if (currentView === 'checklist' && currentChecklist) {
     return (
       <ChecklistView
-        checklist={selectedChecklist}
-        onUpdate={handleUpdateChecklist}
-        onBack={() => setCurrentView('dashboard')}
+        checklist={currentChecklist}
+        onSave={handleSaveChecklist}
+        onBack={() => {
+          setSelectedChecklistId(null);
+          setCurrentView('dashboard');
+        }}
+        isSaving={updateChecklist.isPending}
       />
     );
   }
