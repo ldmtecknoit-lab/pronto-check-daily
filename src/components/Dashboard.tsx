@@ -186,16 +186,14 @@ export default function Dashboard() {
               <Users className="h-4 w-4" />
               Turni Settimanali
             </Button>
-            {monthlyImage?.image_url && (
-              <Button 
-                variant="outline" 
-                onClick={() => setShowMonthlyImageDialog(true)}
-                className="gap-2"
-              >
-                <ImageIcon className="h-4 w-4" />
-                Turni Mensili
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              onClick={() => setShowMonthlyImageDialog(true)}
+              className="gap-2"
+            >
+              <ImageIcon className="h-4 w-4" />
+              Turni Mensili
+            </Button>
             <Button 
               variant="outline" 
               onClick={() => setCurrentView('history')}
@@ -254,13 +252,20 @@ export default function Dashboard() {
               Turni Mensili - {new Date(currentYear, currentMonth - 1).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}
             </DialogTitle>
           </DialogHeader>
-          {monthlyImage?.image_url && (
+          {monthlyImage?.image_url ? (
             <div className="flex justify-center">
               <img 
                 src={monthlyImage.image_url} 
                 alt="Turni Mensili" 
                 className="max-w-full h-auto rounded-lg"
               />
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                Nessuna immagine disponibile per questo mese.
+              </p>
             </div>
           )}
         </DialogContent>
