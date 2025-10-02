@@ -99,10 +99,22 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold mb-2 flex items-center gap-2">
-                <Users className="h-6 w-6" />
-                Turni Settimanali Operatori
-              </h1>
+              <div className="flex items-center gap-4 mb-2">
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <Users className="h-6 w-6" />
+                  Turni Settimanali Operatori
+                </h1>
+                {monthlyImage?.image_url && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowImageDialog(true)}
+                    className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    Turni Mensili
+                  </Button>
+                )}
+              </div>
               <p className="text-primary-foreground/90">
                 Gestione e visualizzazione turni ambulanza
               </p>
@@ -123,51 +135,36 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
       {/* Week Navigation */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
-                className="gap-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Settimana precedente
-              </Button>
-              
-              <div className="text-center">
-                <h2 className="text-lg font-semibold flex items-center gap-2 justify-center">
-                  <Calendar className="h-5 w-5" />
-                  {start} - {end}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {currentWeekOffset === 0 ? 'Settimana corrente' : 
-                   currentWeekOffset > 0 ? `+${currentWeekOffset} settimane` : 
-                   `${currentWeekOffset} settimane`}
-                </p>
-              </div>
-              
-              <Button
-                variant="outline"
-                onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
-                className="gap-2"
-              >
-                Settimana successiva
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
+              className="gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Settimana precedente
+            </Button>
+            
+            <div className="text-center">
+              <h2 className="text-lg font-semibold flex items-center gap-2 justify-center">
+                <Calendar className="h-5 w-5" />
+                {start} - {end}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {currentWeekOffset === 0 ? 'Settimana corrente' : 
+                 currentWeekOffset > 0 ? `+${currentWeekOffset} settimane` : 
+                 `${currentWeekOffset} settimane`}
+              </p>
             </div>
-
-            {monthlyImage?.image_url && (
-              <div className="flex justify-center">
-                <Button
-                  variant="default"
-                  onClick={() => setShowImageDialog(true)}
-                  className="gap-2"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                  Visualizza Turni Mensili
-                </Button>
-              </div>
-            )}
+            
+            <Button
+              variant="outline"
+              onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
+              className="gap-2"
+            >
+              Settimana successiva
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
