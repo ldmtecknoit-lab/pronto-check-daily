@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { History, Ambulance, Calendar, Users } from 'lucide-react';
+import { History, Ambulance, Calendar, Users, Image as ImageIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ShiftCard from '@/components/ShiftCard';
 import ChecklistView from '@/components/ChecklistView';
 import HistoryView from '@/components/HistoryView';
 import WeeklyShifts from '@/components/WeeklyShifts';
 import { CommunicationsPanel } from '@/components/CommunicationsPanel';
 import { useTodayChecklists, useGetOrCreateChecklist, useUpdateChecklist, useChecklists, useChecklist } from '@/hooks/useChecklists';
+import { useMonthlyShiftImage } from '@/hooks/useMonthlyImage';
 import ambulanceImage from '@/assets/ambulance.jpg';
 import type { DailyChecklist, ShiftType } from '@/types/ambulance';
 
@@ -16,11 +18,17 @@ type ViewMode = 'dashboard' | 'checklist' | 'history' | 'shifts';
 export default function Dashboard() {
   const [currentView, setCurrentView] = useState<ViewMode>('dashboard');
   const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
+  const [showMonthlyImageDialog, setShowMonthlyImageDialog] = useState(false);
   const { data: todayChecklists } = useTodayChecklists();
   const { data: allChecklists } = useChecklists();
   const { data: currentChecklist } = useChecklist(selectedChecklistId);
   const { getOrCreateChecklist, isCreating } = useGetOrCreateChecklist();
   const updateChecklist = useUpdateChecklist();
+  
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+  const { data: monthlyImage } = useMonthlyShiftImage(currentMonth, currentYear);
 
   const today = new Date().toISOString().split('T')[0];
   const currentHour = new Date().getHours();
@@ -178,6 +186,16 @@ export default function Dashboard() {
               <Users className="h-4 w-4" />
               Turni Settimanali
             </Button>
+            {monthlyImage?.image_url && (
+              <Button 
+                variant="outline" 
+                onClick={() => setShowMonthlyImageDialog(true)}
+                className="gap-2"
+              >
+                <ImageIcon className="h-4 w-4" />
+                Turni Mensili
+              </Button>
+            )}
             <Button 
               variant="outline" 
               onClick={() => setCurrentView('history')}
@@ -227,6 +245,26 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Monthly Image Dialog */}
+      <Dialog open={showMonthlyImageDialog} onOpenChange={setShowMonthlyImageDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Turni Mensili - {new Date(currentYear, currentMonth - 1).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}
+            </DialogTitle>
+          </DialogHeader>
+          {monthlyImage?.image_url && (
+            <div className="flex justify-center">
+              <img 
+                src={monthlyImage.image_url} 
+                alt="Turni Mensili" 
+                className="max-w-full h-auto rounded-lg"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
