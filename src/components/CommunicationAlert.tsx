@@ -60,10 +60,10 @@ export const CommunicationAlert = ({ communication, onDismiss }: CommunicationAl
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 h-6 w-6"
+          className="absolute right-2 top-2 h-8 w-8 hover:bg-background/80 opacity-70 hover:opacity-100 transition-opacity"
           onClick={handleDismiss}
         >
-          <X className="h-3 w-3" />
+          <X className="h-4 w-4" />
         </Button>
       )}
     </Alert>
