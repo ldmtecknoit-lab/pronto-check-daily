@@ -133,6 +133,33 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_shift_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          month: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          month: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          month?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       operators: {
         Row: {
           created_at: string

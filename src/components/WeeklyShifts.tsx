@@ -11,11 +11,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  AlertCircle 
+  AlertCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useState } from 'react';
 import { useWeeklyShifts, useOperators, type Operator } from '@/hooks/useShifts';
+import { useMonthlyShiftImage } from '@/hooks/useMonthlyImage';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface WeeklyShiftsProps {
   onBack?: () => void;
@@ -23,8 +26,14 @@ interface WeeklyShiftsProps {
 
 export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  const [showImageDialog, setShowImageDialog] = useState(false);
   const { data: weeklyShifts, isLoading, error } = useWeeklyShifts(currentWeekOffset);
   const { data: operators } = useOperators();
+  
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+  const { data: monthlyImage } = useMonthlyShiftImage(currentMonth, currentYear);
 
   const getWeekRange = () => {
     const today = new Date();
@@ -114,39 +123,74 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
       {/* Week Navigation */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
-              className="gap-2"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Settimana precedente
-            </Button>
-            
-            <div className="text-center">
-              <h2 className="text-lg font-semibold flex items-center gap-2 justify-center">
-                <Calendar className="h-5 w-5" />
-                {start} - {end}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {currentWeekOffset === 0 ? 'Settimana corrente' : 
-                 currentWeekOffset > 0 ? `+${currentWeekOffset} settimane` : 
-                 `${currentWeekOffset} settimane`}
-              </p>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
+                className="gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Settimana precedente
+              </Button>
+              
+              <div className="text-center">
+                <h2 className="text-lg font-semibold flex items-center gap-2 justify-center">
+                  <Calendar className="h-5 w-5" />
+                  {start} - {end}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {currentWeekOffset === 0 ? 'Settimana corrente' : 
+                   currentWeekOffset > 0 ? `+${currentWeekOffset} settimane` : 
+                   `${currentWeekOffset} settimane`}
+                </p>
+              </div>
+              
+              <Button
+                variant="outline"
+                onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
+                className="gap-2"
+              >
+                Settimana successiva
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-            
-            <Button
-              variant="outline"
-              onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
-              className="gap-2"
-            >
-              Settimana successiva
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+
+            {monthlyImage?.image_url && (
+              <div className="flex justify-center">
+                <Button
+                  variant="default"
+                  onClick={() => setShowImageDialog(true)}
+                  className="gap-2"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  Visualizza Turni Mensili
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Monthly Image Dialog */}
+      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Turni Mensili - {new Date(currentYear, currentMonth - 1).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}
+            </DialogTitle>
+          </DialogHeader>
+          {monthlyImage?.image_url && (
+            <div className="flex justify-center">
+              <img 
+                src={monthlyImage.image_url} 
+                alt="Turni Mensili" 
+                className="max-w-full h-auto rounded-lg"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Weekly Schedule Grid */}
       <div className="grid gap-4">
