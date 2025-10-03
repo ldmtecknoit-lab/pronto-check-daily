@@ -19,8 +19,10 @@ interface ChecklistViewProps {
 
 export default function ChecklistView({ checklist, onSave, onBack, isSaving }: ChecklistViewProps) {
   const [items, setItems] = useState<ChecklistItem[]>(checklist.items);
+  const isCompleted = checklist.status === 'completed';
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
+    if (isCompleted) return; // Prevent updates if checklist is completed
     setItems(prevItems => 
       prevItems.map(item => 
         item.id === itemId ? { 
@@ -126,6 +128,11 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
           <CardTitle className="flex items-center justify-between">
             <span>Progresso Checklist</span>
             <div className="flex gap-2">
+              {isCompleted && (
+                <Badge className="bg-success text-success-foreground">
+                  Completata
+                </Badge>
+              )}
               <Badge variant="outline">
                 {completedCount}/{totalItems} totali
               </Badge>
@@ -173,15 +180,16 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                       value={item.value || ''} 
                       onValueChange={(value) => updateItem(item.id, { value: value as 'si' | 'no' })}
                       className="flex gap-6 mb-3"
+                      disabled={isCompleted}
                     >
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="si" id={`${item.id}-si`} />
+                        <RadioGroupItem value="si" id={`${item.id}-si`} disabled={isCompleted} />
                         <Label htmlFor={`${item.id}-si`} className="text-success font-medium cursor-pointer">
                           SÌ
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id={`${item.id}-no`} />
+                        <RadioGroupItem value="no" id={`${item.id}-no`} disabled={isCompleted} />
                         <Label htmlFor={`${item.id}-no`} className="text-destructive font-medium cursor-pointer">
                           NO
                         </Label>
@@ -199,6 +207,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                           value={item.assignedTo || ''}
                           onChange={(e) => updateItem(item.id, { assignedTo: e.target.value })}
                           className="w-full"
+                          disabled={isCompleted}
                         />
                       </div>
                     )}
@@ -208,6 +217,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                       value={item.notes || ''}
                       onChange={(e) => updateItem(item.id, { notes: e.target.value })}
                       className="min-h-[60px]"
+                      disabled={isCompleted}
                     />
                   </div>
                 </div>
@@ -217,25 +227,36 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
         </Card>
       ))}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex gap-3">
-        <Button 
-          onClick={handleComplete}
-          disabled={completedRequired < requiredCount || isSaving}
-          className="flex-1 bg-success text-success-foreground hover:bg-success/90"
-        >
-          <CheckCircle className="h-4 w-4 mr-2" />
-          {isSaving ? 'Salvataggio...' : 'Completa Checklist'}
-        </Button>
-        <Button 
-          variant="outline" 
-          className="gap-2" 
-          onClick={handleSave}
-          disabled={isSaving}
-        >
-          <Save className="h-4 w-4" />
-          {isSaving ? 'Salvataggio...' : 'Salva'}
-        </Button>
-      </div>
+      {!isCompleted && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex gap-3">
+          <Button 
+            onClick={handleComplete}
+            disabled={completedRequired < requiredCount || isSaving}
+            className="flex-1 bg-success text-success-foreground hover:bg-success/90"
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            {isSaving ? 'Salvataggio...' : 'Completa Checklist'}
+          </Button>
+          <Button 
+            variant="outline" 
+            className="gap-2" 
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            <Save className="h-4 w-4" />
+            {isSaving ? 'Salvataggio...' : 'Salva'}
+          </Button>
+        </div>
+      )}
+      
+      {isCompleted && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4">
+          <div className="flex items-center justify-center gap-2 text-success">
+            <CheckCircle className="h-5 w-5" />
+            <span className="font-medium">Checklist completata e salvata - Non modificabile</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
