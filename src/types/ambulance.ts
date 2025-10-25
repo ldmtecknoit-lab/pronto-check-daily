@@ -101,4 +101,11 @@ export const CHECKLIST_TEMPLATE: Omit<ChecklistItem, 'id' | 'completed'>[] = [
   // Turno
   { category: 'Turno', description: 'Autista', required: true },
   { category: 'Turno', description: 'Soccorritore', required: true },
+  
+  // Farmaci
+  { category: 'Farmaci', description: 'Betadine Soluzione', required: true },
+  { category: 'Farmaci', description: 'Amuchina', required: true },
+  { category: 'Farmaci', description: 'Foille Spray', required: true },
+  { category: 'Farmaci', description: 'Luan Pomata', required: false },
+  { category: 'Farmaci', description: 'Acqua Ossigenata', required: true },
 ];
