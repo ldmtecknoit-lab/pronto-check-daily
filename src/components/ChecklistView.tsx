@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { DailyChecklist, ChecklistItem } from '@/types/ambulance';
@@ -152,80 +153,103 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
         </CardContent>
       </Card>
 
-      {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-        <Card key={category}>
-          <CardHeader>
-            <CardTitle className="text-lg">{category}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {categoryItems.map((item) => (
-              <div key={item.id} className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-3">
-                      <p className="font-medium">{item.description}</p>
-                      {item.required && (
-                        <Badge variant="outline" className="text-xs">
-                          Obbligatorio
-                        </Badge>
-                      )}
-                      {item.value && (
-                        <Badge className={item.value === 'si' ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}>
-                          {item.value.toUpperCase()}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <RadioGroup 
-                      value={item.value || ''} 
-                      onValueChange={(value) => updateItem(item.id, { value: value as 'si' | 'no' })}
-                      className="flex gap-6 mb-3"
-                      disabled={isCompleted}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="si" id={`${item.id}-si`} disabled={isCompleted} />
-                        <Label htmlFor={`${item.id}-si`} className="text-success font-medium cursor-pointer">
-                          SÌ
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id={`${item.id}-no`} disabled={isCompleted} />
-                        <Label htmlFor={`${item.id}-no`} className="text-destructive font-medium cursor-pointer">
-                          NO
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                    
-                    {/* Campo per inserimento nome per task di pulizia */}
-                    {(item.category === 'Pulizia Ambulanza Eseguita Da' || 
-                      item.category === 'Carrozzeria' || 
-                      item.category === 'Turno') && (
-                      <div className="mb-3">
-                        <Label className="text-sm font-medium mb-2 block">Nome:</Label>
-                        <Input
-                          placeholder="Inserisci nome..."
-                          value={item.assignedTo || ''}
-                          onChange={(e) => updateItem(item.id, { assignedTo: e.target.value })}
-                          className="w-full"
-                          disabled={isCompleted}
-                        />
-                      </div>
+      <Accordion type="multiple" className="space-y-4" defaultValue={Object.keys(itemsByCategory)}>
+        {Object.entries(itemsByCategory).map(([category, categoryItems]) => {
+          const categoryCompleted = categoryItems.filter(item => item.completed).length;
+          const categoryTotal = categoryItems.length;
+          const categoryRequired = categoryItems.filter(item => item.required).length;
+          const categoryCompletedRequired = categoryItems.filter(item => item.required && item.completed).length;
+          
+          return (
+            <AccordionItem key={category} value={category} className="border rounded-lg overflow-hidden">
+              <AccordionTrigger className="px-6 hover:no-underline hover:bg-muted/50">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <span className="font-semibold text-lg">{category}</span>
+                  <div className="flex gap-2">
+                    <Badge variant="outline">
+                      {categoryCompleted}/{categoryTotal}
+                    </Badge>
+                    {categoryRequired > 0 && (
+                      <Badge className={categoryCompletedRequired === categoryRequired ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
+                        {categoryCompletedRequired}/{categoryRequired} obbligatori
+                      </Badge>
                     )}
-                    
-                    <Textarea
-                      placeholder="Note aggiuntive (opzionale)"
-                      value={item.notes || ''}
-                      onChange={(e) => updateItem(item.id, { notes: e.target.value })}
-                      className="min-h-[60px]"
-                      disabled={isCompleted}
-                    />
                   </div>
                 </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ))}
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 pt-2">
+                <div className="space-y-4">
+                  {categoryItems.map((item) => (
+                    <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-3">
+                            <p className="font-medium">{item.description}</p>
+                            {item.required && (
+                              <Badge variant="outline" className="text-xs">
+                                Obbligatorio
+                              </Badge>
+                            )}
+                            {item.value && (
+                              <Badge className={item.value === 'si' ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}>
+                                {item.value.toUpperCase()}
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <RadioGroup 
+                            value={item.value || ''} 
+                            onValueChange={(value) => updateItem(item.id, { value: value as 'si' | 'no' })}
+                            className="flex gap-6 mb-3"
+                            disabled={isCompleted}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="si" id={`${item.id}-si`} disabled={isCompleted} />
+                              <Label htmlFor={`${item.id}-si`} className="text-success font-medium cursor-pointer">
+                                SÌ
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id={`${item.id}-no`} disabled={isCompleted} />
+                              <Label htmlFor={`${item.id}-no`} className="text-destructive font-medium cursor-pointer">
+                                NO
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                          
+                          {/* Campo per inserimento nome per task di pulizia */}
+                          {(item.category === 'Pulizia Ambulanza Eseguita Da' || 
+                            item.category === 'Carrozzeria' || 
+                            item.category === 'Turno') && (
+                            <div className="mb-3">
+                              <Label className="text-sm font-medium mb-2 block">Nome:</Label>
+                              <Input
+                                placeholder="Inserisci nome..."
+                                value={item.assignedTo || ''}
+                                onChange={(e) => updateItem(item.id, { assignedTo: e.target.value })}
+                                className="w-full"
+                                disabled={isCompleted}
+                              />
+                            </div>
+                          )}
+                          
+                          <Textarea
+                            placeholder="Note aggiuntive (opzionale)"
+                            value={item.notes || ''}
+                            onChange={(e) => updateItem(item.id, { notes: e.target.value })}
+                            className="min-h-[60px]"
+                            disabled={isCompleted}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
 
       {!isCompleted && (
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex gap-3">
