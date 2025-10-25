@@ -153,7 +153,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
         </CardContent>
       </Card>
 
-      <Accordion type="multiple" className="space-y-4" defaultValue={Object.keys(itemsByCategory)}>
+      <Accordion type="multiple" className="space-y-4" defaultValue={isCompleted ? Object.keys(itemsByCategory) : []}>
         {Object.entries(itemsByCategory).map(([category, categoryItems]) => {
           const categoryCompleted = categoryItems.filter(item => item.completed).length;
           const categoryTotal = categoryItems.length;
