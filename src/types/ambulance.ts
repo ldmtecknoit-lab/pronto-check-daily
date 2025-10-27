@@ -9,6 +9,7 @@ export interface ChecklistItem {
   notes?: string;
   value?: 'si' | 'no' | null;
   assignedTo?: string; // For names in cleaning tasks
+  signature?: string; // Base64 signature data
 }
 
 export interface DailyChecklist {

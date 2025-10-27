@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { DailyChecklist, ChecklistItem } from '@/types/ambulance';
+import SignaturePad from './SignaturePad';
 
 interface ChecklistViewProps {
   checklist: DailyChecklist;
@@ -228,6 +229,18 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                                 value={item.assignedTo || ''}
                                 onChange={(e) => updateItem(item.id, { assignedTo: e.target.value })}
                                 className="w-full"
+                                disabled={isCompleted}
+                              />
+                            </div>
+                          )}
+                          
+                          {/* Campo firma per categoria Turno */}
+                          {item.category === 'Turno' && (
+                            <div className="mb-3">
+                              <Label className="text-sm font-medium mb-2 block">Firma:</Label>
+                              <SignaturePad
+                                value={item.signature}
+                                onChange={(signature) => updateItem(item.id, { signature })}
                                 disabled={isCompleted}
                               />
                             </div>
