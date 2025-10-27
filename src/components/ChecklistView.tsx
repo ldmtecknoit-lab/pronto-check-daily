@@ -26,14 +26,21 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
     if (isCompleted) return; // Prevent updates if checklist is completed
     setItems(prevItems => 
-      prevItems.map(item => 
-        item.id === itemId ? { 
-          ...item, 
-          ...updates,
-          // Auto-complete when a value is selected
-          completed: updates.value !== undefined ? updates.value !== null : item.completed
-        } : item
-      )
+      prevItems.map(item => {
+        if (item.id !== itemId) return item;
+        
+        const updatedItem = { ...item, ...updates };
+        
+        // Per la categoria Turno, completare quando ci sono nome e firma
+        if (item.category === 'Turno') {
+          updatedItem.completed = !!(updatedItem.assignedTo && updatedItem.signature);
+        } else {
+          // Per altre categorie, completare quando c'è un valore SI/NO
+          updatedItem.completed = updates.value !== undefined ? updates.value !== null : item.completed;
+        }
+        
+        return updatedItem;
+      })
     );
   };
 
