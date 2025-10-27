@@ -61,6 +61,7 @@ export const useChecklists = (startDate?: string, endDate?: string) => {
           notes: checklistItem.notes || '',
           value: checklistItem.value as 'si' | 'no' | null,
           assignedTo: checklistItem.assigned_to || '',
+          signature: checklistItem.signature || '',
         }))
       }));
 
@@ -108,6 +109,7 @@ export const useChecklist = (checklistId: string | null) => {
           notes: item.notes || '',
           value: item.value as 'si' | 'no' | null,
           assignedTo: item.assigned_to || '',
+          signature: item.signature || '',
         }))
       } as DailyChecklist;
     },
@@ -199,6 +201,7 @@ export const useUpdateChecklist = () => {
             notes: item.notes || '',
             value: item.value,
             assigned_to: item.assignedTo || '',
+            signature: item.signature || '',
             updated_at: new Date().toISOString()
           })
           .eq('id', item.id);
