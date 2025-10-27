@@ -198,25 +198,28 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                             )}
                           </div>
                           
-                          <RadioGroup 
-                            value={item.value || ''} 
-                            onValueChange={(value) => updateItem(item.id, { value: value as 'si' | 'no' })}
-                            className="flex gap-6 mb-3"
-                            disabled={isCompleted}
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="si" id={`${item.id}-si`} disabled={isCompleted} />
-                              <Label htmlFor={`${item.id}-si`} className="text-success font-medium cursor-pointer">
-                                SÌ
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="no" id={`${item.id}-no`} disabled={isCompleted} />
-                              <Label htmlFor={`${item.id}-no`} className="text-destructive font-medium cursor-pointer">
-                                NO
-                              </Label>
-                            </div>
-                          </RadioGroup>
+                          {/* Radio buttons SI/NO solo per categorie diverse da Turno */}
+                          {item.category !== 'Turno' && (
+                            <RadioGroup 
+                              value={item.value || ''} 
+                              onValueChange={(value) => updateItem(item.id, { value: value as 'si' | 'no' })}
+                              className="flex gap-6 mb-3"
+                              disabled={isCompleted}
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="si" id={`${item.id}-si`} disabled={isCompleted} />
+                                <Label htmlFor={`${item.id}-si`} className="text-success font-medium cursor-pointer">
+                                  SÌ
+                                </Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="no" id={`${item.id}-no`} disabled={isCompleted} />
+                                <Label htmlFor={`${item.id}-no`} className="text-destructive font-medium cursor-pointer">
+                                  NO
+                                </Label>
+                              </div>
+                            </RadioGroup>
+                          )}
                           
                           {/* Campo per inserimento nome per task di pulizia */}
                           {(item.category === 'Pulizia Ambulanza Eseguita Da' || 

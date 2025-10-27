@@ -25,6 +25,7 @@ export type Database = {
           id: string
           notes: string | null
           required: boolean
+          signature: string | null
           updated_at: string
           value: string | null
         }
@@ -38,6 +39,7 @@ export type Database = {
           id?: string
           notes?: string | null
           required?: boolean
+          signature?: string | null
           updated_at?: string
           value?: string | null
         }
@@ -51,6 +53,7 @@ export type Database = {
           id?: string
           notes?: string | null
           required?: boolean
+          signature?: string | null
           updated_at?: string
           value?: string | null
         }
