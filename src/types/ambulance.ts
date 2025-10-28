@@ -124,4 +124,42 @@ export const CHECKLIST_TEMPLATE: Omit<ChecklistItem, 'id' | 'completed'>[] = [
   { category: 'Farmaci', description: 'Antibiotici (vari)', required: false },
   { category: 'Farmaci', description: 'Antistaminici', required: true },
   { category: 'Farmaci', description: 'Antiemetici', required: false },
+  
+  // Agocannule Safety
+  { category: 'Agocannule Safety', description: 'Agocannula 14G', required: true },
+  { category: 'Agocannule Safety', description: 'Agocannula 18G', required: true },
+  { category: 'Agocannule Safety', description: 'Agocannula 20G', required: true },
+  { category: 'Agocannule Safety', description: 'Agocannula 22G', required: true },
+  { category: 'Agocannule Safety', description: 'Agocannula 24G', required: true },
+  
+  // Bende Orlate
+  { category: 'Bende Orlate', description: 'Benda Orlata 5x10', required: true },
+  { category: 'Bende Orlate', description: 'Benda Orlata 5x15', required: true },
+  { category: 'Bende Orlate', description: 'Benda Orlata 5x20', required: true },
+  
+  // Dispositivi Medici Aggiuntivi
+  { category: 'Dispositivi Medici', description: 'Bisturi Monouso', required: true },
+  { category: 'Dispositivi Medici', description: 'Buste per Raccolta Urine PVC', required: true },
+  { category: 'Dispositivi Medici', description: 'Butterfly (Aghi Epicranici) 21G', required: true },
+  { category: 'Dispositivi Medici', description: 'Butterfly (Aghi Epicranici) 23G', required: true },
+  { category: 'Dispositivi Medici', description: 'Catetere Vescicale Fooley Misura 14', required: true },
+  { category: 'Dispositivi Medici', description: 'Catetere Vescicale Fooley Misura 16', required: true },
+  { category: 'Dispositivi Medici', description: 'Catetere Vescicale Fooley Misura 18', required: true },
+  { category: 'Dispositivi Medici', description: 'Elettrodi Monouso per ECG', required: true },
+  { category: 'Dispositivi Medici', description: 'Fonendoscopio Standard', required: true },
+  { category: 'Dispositivi Medici', description: 'Glucometro', required: true },
+  { category: 'Dispositivi Medici', description: 'Strisce per Glucometro', required: true },
+  { category: 'Dispositivi Medici', description: 'Pungidito', required: true },
+  { category: 'Dispositivi Medici', description: 'Sapone per Lavaggio Mani', required: true },
+  { category: 'Dispositivi Medici', description: 'Sfigmomanometro a Bracciale', required: true },
+  { category: 'Dispositivi Medici', description: 'Siringhe per Insulina', required: true },
+  { category: 'Dispositivi Medici', description: 'Tamponi Nasali Piccoli', required: true },
+  { category: 'Dispositivi Medici', description: 'Tamponi Nasali Medi', required: true },
+  { category: 'Dispositivi Medici', description: 'Tamponi Nasali Grandi', required: true },
+  { category: 'Dispositivi Medici', description: 'Maschere AMBU Misura 1', required: true },
+  { category: 'Dispositivi Medici', description: 'Maschere AMBU Misura 2', required: true },
+  { category: 'Dispositivi Medici', description: 'Maschere AMBU Misura 3', required: true },
+  { category: 'Dispositivi Medici', description: 'Maschere AMBU Misura 4', required: true },
+  { category: 'Dispositivi Medici', description: 'Maschere AMBU Misura 5', required: true },
+  { category: 'Dispositivi Medici', description: 'Sonde per Aspirazione Endotracheale', required: true },
 ];
