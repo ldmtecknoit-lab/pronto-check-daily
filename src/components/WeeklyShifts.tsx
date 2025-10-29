@@ -106,11 +106,6 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
           <ArrowLeft className="h-4 w-4" />
           Torna alla Dashboard
         </Button>
-        <div className="text-right">
-          <div className="text-sm font-medium">
-            {history.length} checklist nello storico
-          </div>
-        </div>
       </div>
       {/* Week Navigation */}
       <Card>
