@@ -175,35 +175,7 @@ export default function Dashboard() {
 
       {/* Shifts Grid */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Checklist per Turno</h2>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setCurrentView('shifts')}
-              className="gap-2"
-            >
-              <Users className="h-4 w-4" />
-              Turni Settimanali
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowMonthlyImageDialog(true)}
-              className="gap-2"
-            >
-              <ImageIcon className="h-4 w-4" />
-              Turni Mensili
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => setCurrentView('history')}
-              className="gap-2"
-            >
-              <History className="h-4 w-4" />
-              Visualizza Storico
-            </Button>
-          </div>
-        </div>
+        <h2 className="text-xl font-semibold mb-4">Checklist per Turno</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ShiftCard
