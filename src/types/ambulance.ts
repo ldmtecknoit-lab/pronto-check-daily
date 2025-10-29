@@ -1,5 +1,19 @@
 export type ShiftType = 'giorno' | 'notte';
 
+export interface ShiftAssignment {
+  driverName: string;
+  driverSignature: string | null; // Base64 signature data
+  rescuerName: string;
+  rescuerSignature: string | null; // Base64 signature data
+}
+
+export const INITIAL_SHIFT_ASSIGNMENT: ShiftAssignment = {
+    driverName: '',
+    driverSignature: null,
+    rescuerName: '',
+    rescuerSignature: null,
+};
+
 export interface ChecklistItem {
   id: string;
   category: string;
@@ -17,6 +31,7 @@ export interface DailyChecklist {
   date: string;
   shift: ShiftType;
   items: ChecklistItem[];
+  shiftAssignment: ShiftAssignment;
   completedAt?: string;
   completedBy?: string;
   status: 'pending' | 'completed' | 'partial';
