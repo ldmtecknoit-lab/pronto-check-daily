@@ -98,20 +98,20 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
                 Gestione e visualizzazione turni ambulanza
               </p>
             </div>
-            {onBack && (
-              <Button 
-                onClick={onBack}
-                variant="ghost"
-                className="gap-2 text-white hover:text-white/80"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Torna alla Dashboard
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
-
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={onBack} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Torna alla Dashboard
+        </Button>
+        <div className="text-right">
+          <div className="text-sm font-medium">
+            {history.length} checklist nello storico
+          </div>
+        </div>
+      </div>
       {/* Week Navigation */}
       <Card>
         <CardContent className="p-4">
