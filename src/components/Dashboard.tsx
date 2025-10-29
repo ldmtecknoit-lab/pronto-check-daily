@@ -173,6 +173,34 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Navigation Buttons */}
+      <div className="flex flex-wrap gap-3">
+        <Button
+          variant="outline"
+          onClick={() => setCurrentView('shifts')}
+          className="gap-2 flex-1 min-w-[200px]"
+        >
+          <Calendar className="h-4 w-4" />
+          Turni Settimanali
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setShowMonthlyImageDialog(true)}
+          className="gap-2 flex-1 min-w-[200px]"
+        >
+          <ImageIcon className="h-4 w-4" />
+          Turni Mensili
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setCurrentView('history')}
+          className="gap-2 flex-1 min-w-[200px]"
+        >
+          <History className="h-4 w-4" />
+          Visualizza Storico
+        </Button>
+      </div>
+
       {/* Shifts Grid */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Checklist per Turno</h2>

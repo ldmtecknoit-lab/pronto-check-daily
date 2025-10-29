@@ -135,17 +135,17 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
       {/* Week Navigation */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <Button
               variant="outline"
               onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
-              className="gap-2 hidden md:flex"
+              className="gap-2 flex-shrink-0"
             >
               <ChevronLeft className="h-4 w-4" />
               Settimana precedente
             </Button>
             
-            <div className="text-center">
+            <div className="text-center flex-shrink-0 px-2">
               <h2 className="text-lg font-semibold flex items-center gap-2 justify-center">
                 <Calendar className="h-5 w-5" />
                 {start} - {end}
@@ -160,7 +160,7 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
             <Button
               variant="outline"
               onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
-              className="gap-2 hidden md:flex"
+              className="gap-2 flex-shrink-0"
             >
               Settimana successiva
               <ChevronRight className="h-4 w-4" />
