@@ -11,7 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react';
 import { useState } from 'react';
 import { useWeeklyShifts, useOperators, type Operator } from '@/hooks/useShifts';
