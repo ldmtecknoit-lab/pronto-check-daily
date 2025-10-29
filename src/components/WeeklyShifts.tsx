@@ -11,14 +11,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  AlertCircle,
-  Image as ImageIcon
+  AlertCircle
 } from 'lucide-react';
 import { useState } from 'react';
 import { useWeeklyShifts, useOperators, type Operator } from '@/hooks/useShifts';
-import { useMonthlyShiftImage } from '@/hooks/useMonthlyImage';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface WeeklyShiftsProps {
   onBack?: () => void;
@@ -26,14 +23,8 @@ interface WeeklyShiftsProps {
 
 export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
-  const [showImageDialog, setShowImageDialog] = useState(false);
   const { data: weeklyShifts, isLoading, error } = useWeeklyShifts(currentWeekOffset);
   const { data: operators } = useOperators();
-  
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
-  const currentYear = currentDate.getFullYear();
-  const { data: monthlyImage } = useMonthlyShiftImage(currentMonth, currentYear);
 
   const getWeekRange = () => {
     const today = new Date();
@@ -99,22 +90,10 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-4 mb-2">
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                  <Users className="h-6 w-6" />
-                  Turni Settimanali Operatori
-                </h1>
-                {monthlyImage?.image_url && (
-                  <Button
-                    variant="secondary"
-                    onClick={() => setShowImageDialog(true)}
-                    className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
-                  >
-                    <ImageIcon className="h-4 w-4" />
-                    Turni Mensili
-                  </Button>
-                )}
-              </div>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Users className="h-6 w-6" />
+                Turni Settimanali Operatori
+              </h1>
               <p className="text-primary-foreground/90">
                 Gestione e visualizzazione turni ambulanza
               </p>
@@ -122,9 +101,10 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
             {onBack && (
               <Button 
                 onClick={onBack}
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                variant="ghost"
+                className="gap-2 text-white hover:text-white/80"
               >
+                <ChevronLeft className="h-4 w-4" />
                 Torna alla Dashboard
               </Button>
             )}
@@ -168,26 +148,6 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
           </div>
         </CardContent>
       </Card>
-
-      {/* Monthly Image Dialog */}
-      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Turni Mensili - {new Date(currentYear, currentMonth - 1).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}
-            </DialogTitle>
-          </DialogHeader>
-          {monthlyImage?.image_url && (
-            <div className="flex justify-center">
-              <img 
-                src={monthlyImage.image_url} 
-                alt="Turni Mensili" 
-                className="max-w-full h-auto rounded-lg"
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Weekly Schedule Grid */}
       <div className="grid gap-4">
