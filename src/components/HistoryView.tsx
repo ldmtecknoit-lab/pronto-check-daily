@@ -42,7 +42,7 @@ export default function HistoryView({ history, onBack, onViewChecklist }: Histor
 
   if (history.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
         <div className="flex items-center justify-between">
           <Button variant="ghost" onClick={onBack} className="gap-2">
             <ArrowLeft className="h-4 w-4" />
@@ -64,7 +64,7 @@ export default function HistoryView({ history, onBack, onViewChecklist }: Histor
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack} className="gap-2">
           <ArrowLeft className="h-4 w-4" />

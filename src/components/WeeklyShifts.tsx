@@ -85,7 +85,7 @@ export default function WeeklyShifts({ onBack }: WeeklyShiftsProps) {
   if (!weeklyShifts) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
       {/* Header */}
       <Card className="bg-gradient-to-r from-primary to-accent text-white">
         <CardContent className="p-6">

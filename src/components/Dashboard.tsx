@@ -101,7 +101,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
       {/* Communications Panel */}
       <CommunicationsPanel />
 
