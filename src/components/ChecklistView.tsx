@@ -277,7 +277,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
       {!isCompleted && (
         <div 
           className="fixed bottom-0 left-0 right-0 w-full bg-background border-t px-4 pt-4 flex gap-3 z-10"
-          style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }} // 1rem è il p-4 standard di tailwind
+          style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }} // 1rem è il p-4 standard di tailwind
         >
           <Button 
             onClick={handleComplete}
