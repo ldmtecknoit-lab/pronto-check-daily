@@ -162,7 +162,11 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
       </Card>
 
       <Accordion type="multiple" className="space-y-4" defaultValue={isCompleted ? Object.keys(itemsByCategory) : []}>
-        {Object.entries(itemsByCategory).map(([category, categoryItems]) => {
+        {Object.entries(itemsByCategory).sort(([a], [b]) => {
+          if (a === 'Turno') return -1;
+          if (b === 'Turno') return 1;
+          return a.localeCompare(b);
+          }).map(([category, categoryItems]) => {
           const categoryCompleted = categoryItems.filter(item => item.completed).length;
           const categoryTotal = categoryItems.length;
           const categoryRequired = categoryItems.filter(item => item.required).length;
