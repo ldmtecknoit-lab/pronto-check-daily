@@ -27,6 +27,10 @@ export interface ChecklistHistory {
 }
 
 export const CHECKLIST_TEMPLATE: Omit<ChecklistItem, 'id' | 'completed'>[] = [
+  // Turno
+  { category: 'Turno', description: 'Autista', required: true },
+  { category: 'Turno', description: 'Soccorritore', required: true },
+  
   // Vano Guida
   { category: 'Vano Guida', description: 'Cartellina 118', required: true },
   { category: 'Vano Guida', description: 'DAE Multiparametrico', required: true },
@@ -98,10 +102,6 @@ export const CHECKLIST_TEMPLATE: Omit<ChecklistItem, 'id' | 'completed'>[] = [
   
   // Carrozzeria
   { category: 'Carrozzeria', description: 'Controllo Carrozzeria', required: true },
-  
-  // Turno
-  { category: 'Turno', description: 'Autista', required: true },
-  { category: 'Turno', description: 'Soccorritore', required: true },
   
   // Farmaci
   { category: 'Farmaci', description: 'Betadine Soluzione', required: true },
