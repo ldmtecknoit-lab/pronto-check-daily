@@ -275,41 +275,41 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
       </Accordion>
 
       {!isCompleted && (
-        <div 
-          className="fixed bottom-0 left-0 right-0 w-full bg-background border-t px-4 pt-4 flex gap-3 z-10"
-          style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }} // 1rem è il p-4 standard di tailwind
-        >
-          <Button 
-            onClick={handleComplete}
-            disabled={completedRequired < requiredCount || isSaving}
-            className="flex-1 bg-success text-success-foreground hover:bg-success/90"
-          >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            {isSaving ? 'Salvataggio...' : 'Completa Checklist'}
-          </Button>
-          <Button 
-            variant="outline" 
-            className="gap-2" 
-            onClick={handleSave}
-            disabled={isSaving}
-          >
-            <Save className="h-4 w-4" />
-            {isSaving ? 'Salvataggio...' : 'Salva'}
-          </Button>
-        </div>
-      )}
-      
-      {isCompleted && (
-        <div 
-          className="fixed bottom-0 left-0 right-0 w-full bg-background border-t p-4 z-10"
-          style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
-        >
-          <div className="flex items-center justify-center gap-2 text-success">
-            <CheckCircle className="h-5 w-5" />
-            <span className="font-medium">Checklist completata e salvata - Non modificabile</span>
-          </div>
-        </div>
-      )}
+        <div 
+          className="fixed bottom-0 left-0 right-0 w-full bg-background border-t px-4 pt-4 flex gap-3 z-10"
+          style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}
+        >
+          <Button 
+            onClick={handleComplete}
+            disabled={completedRequired < requiredCount || isSaving}
+            className="flex-1 bg-success text-success-foreground hover:bg-success/90"
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            {isSaving ? 'Salvataggio...' : 'Completa Checklist'}
+          </Button>
+          <Button 
+            variant="outline" 
+            className="gap-2" 
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            <Save className="h-4 w-4" />
+            {isSaving ? 'Salvataggio...' : 'Salva'}
+          </Button>
+        </div>
+      )}
+      
+      {isCompleted && (
+        <div 
+          className="fixed bottom-0 left-0 right-0 w-full bg-background border-t p-4 z-10"
+          style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+        >
+          <div className="flex items-center justify-center gap-2 text-success">
+            <CheckCircle className="h-5 w-5" />
+            <span className="font-medium">Checklist completata e salvata - Non modificabile</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
