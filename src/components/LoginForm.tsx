@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Stethoscope } from "lucide-react";
+import { validateEmail, validatePassword } from "@/lib/validation";
+import { toast } from "@/hooks/use-toast";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -15,6 +16,29 @@ const LoginForm = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate email
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      toast({
+        title: "Errore validazione",
+        description: emailValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      toast({
+        title: "Errore validazione",
+        description: passwordValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     await signIn(email, password);
     setIsLoading(false);
@@ -49,6 +73,7 @@ const LoginForm = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  maxLength={255}
                   className="focus:ring-accent focus:border-accent"
                 />
               </div>
@@ -60,6 +85,8 @@ const LoginForm = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={8}
+                  maxLength={100}
                   className="focus:ring-accent focus:border-accent"
                 />
               </div>

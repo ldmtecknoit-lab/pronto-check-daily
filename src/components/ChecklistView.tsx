@@ -11,6 +11,7 @@ import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { DailyChecklist, ChecklistItem } from '@/types/ambulance';
 import SignaturePad from './SignaturePad';
+import { validateChecklistNotes, validateAssignedTo } from '@/lib/validation';
 
 interface ChecklistViewProps {
   checklist: DailyChecklist;
@@ -25,6 +26,32 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
     if (isCompleted) return; // Prevent updates if checklist is completed
+    
+    // Validate inputs before updating
+    if (updates.notes !== undefined && updates.notes) {
+      const notesValidation = validateChecklistNotes(updates.notes);
+      if (!notesValidation.valid) {
+        toast({
+          title: "Errore validazione",
+          description: notesValidation.error,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
+    if (updates.assignedTo !== undefined && updates.assignedTo) {
+      const nameValidation = validateAssignedTo(updates.assignedTo);
+      if (!nameValidation.valid) {
+        toast({
+          title: "Errore validazione",
+          description: nameValidation.error,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
     setItems(prevItems => 
       prevItems.map(item => {
         if (item.id !== itemId) return item;
@@ -244,6 +271,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                                 onChange={(e) => updateItem(item.id, { assignedTo: e.target.value })}
                                 className="w-full"
                                 disabled={isCompleted}
+                                maxLength={100}
                               />
                             </div>
                           )}
@@ -266,6 +294,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                             onChange={(e) => updateItem(item.id, { notes: e.target.value })}
                             className="min-h-[60px]"
                             disabled={isCompleted}
+                            maxLength={2000}
                           />
                         </div>
                       </div>
