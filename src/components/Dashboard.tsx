@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { History, Ambulance, Calendar, Users, Image as ImageIcon } from 'lucide-react';
+import { History, Ambulance, Calendar, Users, Image as ImageIcon, RotateCw, RotateCcw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import ShiftCard from '@/components/ShiftCard';
@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
   const [showMonthlyImageDialog, setShowMonthlyImageDialog] = useState(false);
   const [showEnlargedImage, setShowEnlargedImage] = useState(false);
+  const [imageRotation, setImageRotation] = useState(0);
   const { data: todayChecklists } = useTodayChecklists();
   const { data: allChecklists } = useChecklists();
   const { data: currentChecklist } = useChecklist(selectedChecklistId);
@@ -276,11 +277,35 @@ export default function Dashboard() {
       </Dialog>
 
       {/* Enlarged Image Dialog */}
-      <Dialog open={showEnlargedImage} onOpenChange={setShowEnlargedImage}>
+      <Dialog open={showEnlargedImage} onOpenChange={(open) => {
+        setShowEnlargedImage(open);
+        if (!open) setImageRotation(0);
+      }}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-2">
           <DialogHeader className="sr-only">
             <DialogTitle>Immagine Turni Ingrandita</DialogTitle>
           </DialogHeader>
+          
+          {/* Rotation Controls */}
+          <div className="absolute top-4 right-14 z-50 flex gap-2">
+            <Button
+              size="icon"
+              variant="secondary"
+              onClick={() => setImageRotation((prev) => prev - 90)}
+              title="Ruota a sinistra"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="secondary"
+              onClick={() => setImageRotation((prev) => prev + 90)}
+              title="Ruota a destra"
+            >
+              <RotateCw className="h-4 w-4" />
+            </Button>
+          </div>
+
           {monthlyImage?.image_url && (
             <TransformWrapper
               initialScale={1}
@@ -298,7 +323,8 @@ export default function Dashboard() {
                 <img 
                   src={monthlyImage.image_url} 
                   alt="Turni Mensili Ingranditi" 
-                  className="max-w-full max-h-full object-contain rounded-lg"
+                  className="max-w-full max-h-full object-contain rounded-lg transition-transform duration-300"
+                  style={{ transform: `rotate(${imageRotation}deg)` }}
                 />
               </TransformComponent>
             </TransformWrapper>
