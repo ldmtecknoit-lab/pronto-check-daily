@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { History, Ambulance, Calendar, Users, Image as ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import ShiftCard from '@/components/ShiftCard';
 import ChecklistView from '@/components/ChecklistView';
 import HistoryView from '@/components/HistoryView';
@@ -281,13 +282,26 @@ export default function Dashboard() {
             <DialogTitle>Immagine Turni Ingrandita</DialogTitle>
           </DialogHeader>
           {monthlyImage?.image_url && (
-            <div className="flex items-center justify-center w-full h-full">
-              <img 
-                src={monthlyImage.image_url} 
-                alt="Turni Mensili Ingranditi" 
-                className="max-w-full max-h-full object-contain rounded-lg"
-              />
-            </div>
+            <TransformWrapper
+              initialScale={1}
+              minScale={0.5}
+              maxScale={4}
+              centerOnInit
+              wheel={{ step: 0.1 }}
+              pinch={{ step: 5 }}
+              doubleClick={{ mode: "reset" }}
+            >
+              <TransformComponent
+                wrapperClass="!w-full !h-full flex items-center justify-center"
+                contentClass="!w-full !h-full flex items-center justify-center"
+              >
+                <img 
+                  src={monthlyImage.image_url} 
+                  alt="Turni Mensili Ingranditi" 
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                />
+              </TransformComponent>
+            </TransformWrapper>
           )}
         </DialogContent>
       </Dialog>
