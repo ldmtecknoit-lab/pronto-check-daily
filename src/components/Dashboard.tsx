@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [currentView, setCurrentView] = useState<ViewMode>('dashboard');
   const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
   const [showMonthlyImageDialog, setShowMonthlyImageDialog] = useState(false);
+  const [showEnlargedImage, setShowEnlargedImage] = useState(false);
   const { data: todayChecklists } = useTodayChecklists();
   const { data: allChecklists } = useChecklists();
   const { data: currentChecklist } = useChecklist(selectedChecklistId);
@@ -257,7 +258,9 @@ export default function Dashboard() {
               <img 
                 src={monthlyImage.image_url} 
                 alt="Turni Mensili" 
-                className="max-w-full h-auto rounded-lg"
+                className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => setShowEnlargedImage(true)}
+                title="Clicca per ingrandire"
               />
             </div>
           ) : (
@@ -266,6 +269,24 @@ export default function Dashboard() {
               <p className="text-muted-foreground">
                 Nessuna immagine disponibile per questo mese.
               </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Enlarged Image Dialog */}
+      <Dialog open={showEnlargedImage} onOpenChange={setShowEnlargedImage}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-2">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Immagine Turni Ingrandita</DialogTitle>
+          </DialogHeader>
+          {monthlyImage?.image_url && (
+            <div className="flex items-center justify-center w-full h-full">
+              <img 
+                src={monthlyImage.image_url} 
+                alt="Turni Mensili Ingranditi" 
+                className="max-w-full max-h-full object-contain rounded-lg"
+              />
             </div>
           )}
         </DialogContent>
