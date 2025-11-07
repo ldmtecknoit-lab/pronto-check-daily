@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { History, Ambulance, Calendar, Users, Image as ImageIcon, RotateCw, RotateCcw } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { History, Ambulance, Calendar, Users, Image as ImageIcon, RotateCw, RotateCcw, Download } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { toast } from 'sonner';
 import ShiftCard from '@/components/ShiftCard';
 import ChecklistView from '@/components/ChecklistView';
 import HistoryView from '@/components/HistoryView';
@@ -22,6 +23,9 @@ export default function Dashboard() {
   const [showMonthlyImageDialog, setShowMonthlyImageDialog] = useState(false);
   const [showEnlargedImage, setShowEnlargedImage] = useState(false);
   const [imageRotation, setImageRotation] = useState(0);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [latestVersion, setLatestVersion] = useState('');
   const { data: todayChecklists } = useTodayChecklists();
   const { data: allChecklists } = useChecklists();
   const { data: currentChecklist } = useChecklist(selectedChecklistId);
@@ -32,6 +36,36 @@ export default function Dashboard() {
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
   const { data: monthlyImage } = useMonthlyShiftImage(currentMonth, currentYear);
+
+  const checkForUpdates = async () => {
+    try {
+      toast.info('Controllo aggiornamenti...');
+      // Replace with your actual version check endpoint or JSON file URL
+      const response = await fetch('/version.json');
+      const data = await response.json();
+      const currentVersion = '1.0.0'; // This should come from your app config
+      
+      if (data.version !== currentVersion) {
+        setLatestVersion(data.version);
+        setUpdateAvailable(true);
+        setShowUpdateDialog(true);
+      } else {
+        toast.success('App già aggiornata!');
+      }
+    } catch (error) {
+      // If version.json doesn't exist, show manual download option
+      setLatestVersion('Ultima versione');
+      setUpdateAvailable(true);
+      setShowUpdateDialog(true);
+    }
+  };
+
+  const downloadApk = () => {
+    // Replace with your actual APK download URL
+    const apkUrl = 'https://your-domain.com/app-latest.apk';
+    window.open(apkUrl, '_blank');
+    toast.success('Download avviato!');
+  };
 
   const today = new Date().toISOString().split('T')[0];
   const currentHour = new Date().getHours();
@@ -202,6 +236,14 @@ export default function Dashboard() {
           <History className="h-4 w-4" />
           Visualizza Storico
         </Button>
+        <Button
+          variant="outline"
+          onClick={checkForUpdates}
+          className="gap-2 flex-1 min-w-[200px]"
+        >
+          <Download className="h-4 w-4" />
+          Controlla Aggiornamenti
+        </Button>
       </div>
 
       {/* Shifts Grid */}
@@ -329,6 +371,32 @@ export default function Dashboard() {
               </TransformComponent>
             </TransformWrapper>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Available Dialog */}
+      <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aggiornamento Disponibile</DialogTitle>
+            <DialogDescription>
+              È disponibile una nuova versione dell'app ({latestVersion}).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Scarica l'ultima versione per accedere alle nuove funzionalità e miglioramenti.
+            </p>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowUpdateDialog(false)}>
+              Più Tardi
+            </Button>
+            <Button onClick={downloadApk}>
+              <Download className="mr-2 h-4 w-4" />
+              Scarica APK
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
