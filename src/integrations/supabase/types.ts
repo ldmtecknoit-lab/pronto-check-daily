@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_versions: {
+        Row: {
+          apk_url: string
+          created_at: string
+          id: string
+          is_current: boolean
+          release_notes: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          apk_url: string
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          release_notes?: string | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          apk_url?: string
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          release_notes?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       checklist_items: {
         Row: {
           assigned_to: string | null

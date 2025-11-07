@@ -12,6 +12,7 @@ import WeeklyShifts from '@/components/WeeklyShifts';
 import { CommunicationsPanel } from '@/components/CommunicationsPanel';
 import { useTodayChecklists, useGetOrCreateChecklist, useUpdateChecklist, useChecklists, useChecklist } from '@/hooks/useChecklists';
 import { useMonthlyShiftImage } from '@/hooks/useMonthlyImage';
+import { useCurrentAppVersion } from '@/hooks/useAppVersion';
 import ambulanceImage from '@/assets/ambulance.jpg';
 import type { DailyChecklist, ShiftType } from '@/types/ambulance';
 
@@ -36,34 +37,27 @@ export default function Dashboard() {
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
   const { data: monthlyImage } = useMonthlyShiftImage(currentMonth, currentYear);
+  const { data: currentVersion } = useCurrentAppVersion();
 
-  const checkForUpdates = async () => {
-    try {
-      toast.info('Controllo aggiornamenti...');
-      // Replace with your actual version check endpoint or JSON file URL
-      const response = await fetch('/version.json');
-      const data = await response.json();
-      const currentVersion = '1.0.0'; // This should come from your app config
-      
-      if (data.version !== currentVersion) {
-        setLatestVersion(data.version);
-        setUpdateAvailable(true);
-        setShowUpdateDialog(true);
-      } else {
-        toast.success('App già aggiornata!');
-      }
-    } catch (error) {
-      // If version.json doesn't exist, show manual download option
-      setLatestVersion('Ultima versione');
-      setUpdateAvailable(true);
-      setShowUpdateDialog(true);
+  const checkForUpdates = () => {
+    if (!currentVersion) {
+      toast.error('Impossibile controllare gli aggiornamenti');
+      return;
     }
+    
+    toast.info('Nuovo aggiornamento disponibile!');
+    setLatestVersion(currentVersion.version);
+    setUpdateAvailable(true);
+    setShowUpdateDialog(true);
   };
 
   const downloadApk = () => {
-    // Replace with your actual APK download URL
-    const apkUrl = 'https://your-domain.com/app-latest.apk';
-    window.open(apkUrl, '_blank');
+    if (!currentVersion?.apk_url) {
+      toast.error('URL APK non disponibile');
+      return;
+    }
+    
+    window.open(currentVersion.apk_url, '_blank');
     toast.success('Download avviato!');
   };
 
@@ -384,6 +378,12 @@ export default function Dashboard() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
+            {currentVersion?.release_notes && (
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold mb-2">Note di rilascio:</h4>
+                <p className="text-sm text-muted-foreground">{currentVersion.release_notes}</p>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">
               Scarica l'ultima versione per accedere alle nuove funzionalità e miglioramenti.
             </p>
