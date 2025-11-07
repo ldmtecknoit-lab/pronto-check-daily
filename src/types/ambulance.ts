@@ -162,4 +162,50 @@ export const CHECKLIST_TEMPLATE: Omit<ChecklistItem, 'id' | 'completed'>[] = [
   { category: 'Dispositivi Medici', description: 'Maschere AMBU Misura 4', required: true },
   { category: 'Dispositivi Medici', description: 'Maschere AMBU Misura 5', required: true },
   { category: 'Dispositivi Medici', description: 'Sonde per Aspirazione Endotracheale', required: true },
+  { category: 'Dispositivi Medici', description: 'Otoscopio', required: true },
+  { category: 'Dispositivi Medici', description: 'Oftalmoscopio', required: true },
+  { category: 'Dispositivi Medici', description: 'Rilevatore Monossido', required: true },
+  
+  // Attrezzature di Trasporto
+  { category: 'Attrezzature di Trasporto', description: 'Barella a Cucchiaio', required: true },
+  { category: 'Attrezzature di Trasporto', description: 'Barella Autocaricante', required: true },
+  { category: 'Attrezzature di Trasporto', description: 'Sedia Portantina', required: true },
+  { category: 'Attrezzature di Trasporto', description: 'Adattatore Pediatrico per Barella', required: true },
+  
+  // Immobilizzazione
+  { category: 'Immobilizzazione', description: 'Tavola Spinale', required: true },
+  { category: 'Immobilizzazione', description: 'Collari Cervicali', required: true },
+  { category: 'Immobilizzazione', description: 'Ferma-capo', required: true },
+  { category: 'Immobilizzazione', description: 'KED', required: true },
+  { category: 'Immobilizzazione', description: 'Materassino a Depressione', required: true },
+  { category: 'Immobilizzazione', description: 'Kit Steccobende Rigide e a Depressione', required: true },
+  
+  // Teli e Dispositivi di Supporto
+  { category: 'Teli e Dispositivi', description: 'Telo Adulto', required: true },
+  { category: 'Teli e Dispositivi', description: 'Telo Pediatrico', required: true },
+  { category: 'Teli e Dispositivi', description: 'Ragno Adulto', required: true },
+  { category: 'Teli e Dispositivi', description: 'Ragno Pediatrico', required: true },
+  
+  // Kit Specializzati
+  { category: 'Kit Specializzati', description: 'Kit Ustioni', required: true },
+  { category: 'Kit Specializzati', description: 'Kit Parto', required: true },
+  { category: 'Kit Specializzati', description: 'Kit Arti', required: true },
+  { category: 'Kit Specializzati', description: 'Kit Sutura', required: true },
+  { category: 'Kit Specializzati', description: 'Kit Emodializzati', required: true },
+  
+  // Aspirazione e Ventilazione
+  { category: 'Aspirazione e Ventilazione', description: 'Aspiratore Fisso', required: true },
+  { category: 'Aspirazione e Ventilazione', description: 'Aspiratore Portatile', required: true },
+  { category: 'Aspirazione e Ventilazione', description: 'Pallone AMBU Adulto', required: true },
+  { category: 'Aspirazione e Ventilazione', description: 'Pallone AMBU Pediatrico', required: true },
+  
+  // Dispositivi di Protezione
+  { category: 'Dispositivi di Protezione', description: 'Caschi', required: true },
+  { category: 'Dispositivi di Protezione', description: 'Robin', required: true },
+  
+  // Controlli Veicolo
+  { category: 'Controlli Veicolo', description: 'Livello Carburante', required: true },
+  { category: 'Controlli Veicolo', description: 'Livello Olio Motore', required: true },
+  { category: 'Controlli Veicolo', description: 'Livello Acqua Motore', required: true },
+  { category: 'Controlli Veicolo', description: 'Livello Liquido Freni', required: true },
 ];
