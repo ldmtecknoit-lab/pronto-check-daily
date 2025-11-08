@@ -7,11 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { DailyChecklist, ChecklistItem } from '@/types/ambulance';
 import SignaturePad from './SignaturePad';
 import { validateChecklistNotes, validateAssignedTo } from '@/lib/validation';
+import { useOperators } from '@/hooks/useOperators';
 
 interface ChecklistViewProps {
   checklist: DailyChecklist;
@@ -23,6 +25,7 @@ interface ChecklistViewProps {
 export default function ChecklistView({ checklist, onSave, onBack, isSaving }: ChecklistViewProps) {
   const [items, setItems] = useState<ChecklistItem[]>(checklist.items);
   const isCompleted = checklist.status === 'completed';
+  const { data: operators, isLoading: isLoadingOperators } = useOperators();
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
     if (isCompleted) return; // Prevent updates if checklist is completed
@@ -259,10 +262,32 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                             </RadioGroup>
                           )}
                           
+                          {/* Campo per selezione operatore per categoria Turno */}
+                          {item.category === 'Turno' && (
+                            <div className="mb-3">
+                              <Label className="text-sm font-medium mb-2 block">Operatore:</Label>
+                              <Select
+                                value={item.assignedTo || ''}
+                                onValueChange={(value) => updateItem(item.id, { assignedTo: value })}
+                                disabled={isCompleted || isLoadingOperators}
+                              >
+                                <SelectTrigger className="w-full bg-background">
+                                  <SelectValue placeholder={isLoadingOperators ? "Caricamento..." : "Seleziona operatore..."} />
+                                </SelectTrigger>
+                                <SelectContent className="bg-background z-50">
+                                  {operators?.map((operator) => (
+                                    <SelectItem key={operator.id} value={operator.name}>
+                                      {operator.name} - {operator.role}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                          
                           {/* Campo per inserimento nome per task di pulizia */}
                           {(item.category === 'Pulizia Ambulanza Eseguita Da' || 
-                            item.category === 'Carrozzeria' || 
-                            item.category === 'Turno') && (
+                            item.category === 'Carrozzeria') && (
                             <div className="mb-3">
                               <Label className="text-sm font-medium mb-2 block">Nome:</Label>
                               <Input
