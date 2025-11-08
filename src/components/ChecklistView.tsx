@@ -275,11 +275,21 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                                   <SelectValue placeholder={isLoadingOperators ? "Caricamento..." : "Seleziona operatore..."} />
                                 </SelectTrigger>
                                 <SelectContent className="bg-background z-50">
-                                  {operators?.map((operator) => (
-                                    <SelectItem key={operator.id} value={operator.name}>
-                                      {operator.name} - {operator.role}
-                                    </SelectItem>
-                                  ))}
+                                  {operators
+                                    ?.filter((operator) => {
+                                      // Filtra in base alla descrizione dell'item
+                                      if (item.description === 'Autista') {
+                                        return operator.role.toLowerCase() === 'autista';
+                                      } else if (item.description === 'Soccorritore') {
+                                        return operator.role.toLowerCase() === 'soccorritore';
+                                      }
+                                      return true;
+                                    })
+                                    .map((operator) => (
+                                      <SelectItem key={operator.id} value={operator.name}>
+                                        {operator.name}
+                                      </SelectItem>
+                                    ))}
                                 </SelectContent>
                               </Select>
                             </div>
