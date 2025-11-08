@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { History, Ambulance, Calendar, Users, Image as ImageIcon, RotateCw, RotateCcw, Download } from 'lucide-react';
@@ -13,6 +13,7 @@ import { CommunicationsPanel } from '@/components/CommunicationsPanel';
 import { useTodayChecklists, useGetOrCreateChecklist, useUpdateChecklist, useChecklists, useChecklist } from '@/hooks/useChecklists';
 import { useMonthlyShiftImage } from '@/hooks/useMonthlyImage';
 import { useCurrentAppVersion } from '@/hooks/useAppVersion';
+import { APP_VERSION } from '@/config/app';
 import ambulanceImage from '@/assets/ambulance.jpg';
 import type { DailyChecklist, ShiftType } from '@/types/ambulance';
 
@@ -32,6 +33,15 @@ export default function Dashboard() {
   const { data: currentChecklist } = useChecklist(selectedChecklistId);
   const { getOrCreateChecklist, isCreating } = useGetOrCreateChecklist();
   const updateChecklist = useUpdateChecklist();
+  
+  // All'avvio, aggiorna la versione installata in localStorage
+  useEffect(() => {
+    const storedVersion = localStorage.getItem('app_installed_version');
+    if (storedVersion !== APP_VERSION) {
+      localStorage.setItem('app_installed_version', APP_VERSION);
+      console.log(`App version updated to ${APP_VERSION}`);
+    }
+  }, []);
   
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
@@ -64,9 +74,6 @@ export default function Dashboard() {
       toast.error('URL APK non disponibile');
       return;
     }
-    
-    // Save downloaded version to localStorage
-    localStorage.setItem('app_installed_version', currentVersion.version);
     
     window.open(currentVersion.apk_url, '_blank');
     toast.success('Download avviato! Installa l\'APK per completare l\'aggiornamento.');
