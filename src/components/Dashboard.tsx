@@ -45,10 +45,18 @@ export default function Dashboard() {
       return;
     }
     
-    toast.info('Nuovo aggiornamento disponibile!');
-    setLatestVersion(currentVersion.version);
-    setUpdateAvailable(true);
-    setShowUpdateDialog(true);
+    // Get installed version from localStorage
+    const installedVersion = localStorage.getItem('app_installed_version') || '1.0.0';
+    
+    // Compare versions (simple string comparison, works for semantic versioning)
+    if (currentVersion.version > installedVersion) {
+      toast.info('Nuovo aggiornamento disponibile!');
+      setLatestVersion(currentVersion.version);
+      setUpdateAvailable(true);
+      setShowUpdateDialog(true);
+    } else {
+      toast.success('App già aggiornata!');
+    }
   };
 
   const downloadApk = () => {
@@ -57,8 +65,12 @@ export default function Dashboard() {
       return;
     }
     
+    // Save downloaded version to localStorage
+    localStorage.setItem('app_installed_version', currentVersion.version);
+    
     window.open(currentVersion.apk_url, '_blank');
-    toast.success('Download avviato!');
+    toast.success('Download avviato! Installa l\'APK per completare l\'aggiornamento.');
+    setShowUpdateDialog(false);
   };
 
   const today = new Date().toISOString().split('T')[0];
