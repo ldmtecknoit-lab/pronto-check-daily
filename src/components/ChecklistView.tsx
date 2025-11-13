@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { ArrowLeft, Save, CheckCircle, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { DailyChecklist, ChecklistItem } from '@/types/ambulance';
 import SignaturePad from './SignaturePad';
@@ -149,49 +149,49 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
   }, {} as Record<string, ChecklistItem[]>);
 
   return (
-    <div className="space-y-6 pb-24">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
+    <div className="space-y-3 pb-24">
+      <div className="flex items-center justify-between py-2">
+        <Button variant="ghost" onClick={onBack} size="sm" className="gap-2 -ml-2">
           <ArrowLeft className="h-4 w-4" />
-          Torna alla Dashboard
+          Indietro
         </Button>
         <div className="text-right">
-          <div className="text-sm font-medium">
-            Turno {checklist.shift} - {new Date(checklist.date).toLocaleDateString('it-IT')}
+          <div className="text-xs font-medium">
+            {checklist.shift.toUpperCase()} - {new Date(checklist.date).toLocaleDateString('it-IT')}
           </div>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Progresso Checklist</span>
-            <div className="flex gap-2">
+      <Card className="shadow-sm">
+        <CardHeader className="p-3">
+          <CardTitle className="flex items-center justify-between text-base">
+            <span>Progresso</span>
+            <div className="flex gap-1.5">
               {isCompleted && (
-                <Badge className="bg-success text-success-foreground">
-                  Completata
+                <Badge className="bg-success text-success-foreground text-xs">
+                  ✓ Completata
                 </Badge>
               )}
-              <Badge variant="outline">
-                {completedCount}/{totalItems} totali
+              <Badge variant="outline" className="text-xs">
+                {completedCount}/{totalItems}
               </Badge>
-              <Badge className={completedRequired === requiredCount ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
-                {completedRequired}/{requiredCount} obbligatori
+              <Badge className={completedRequired === requiredCount ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground text-xs'}>
+                {completedRequired}/{requiredCount} obb.
               </Badge>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="w-full bg-muted rounded-full h-2">
+        <CardContent className="p-3 pt-0">
+          <div className="w-full bg-muted rounded-full h-1.5">
             <div 
-              className="bg-accent h-2 rounded-full transition-all duration-300"
+              className="bg-accent h-1.5 rounded-full transition-all duration-300"
               style={{ width: `${(completedCount / totalItems) * 100}%` }}
             />
           </div>
         </CardContent>
       </Card>
 
-      <Accordion type="multiple" className="space-y-4" defaultValue={isCompleted ? Object.keys(itemsByCategory) : []}>
+      <Accordion type="multiple" className="space-y-2" defaultValue={isCompleted ? Object.keys(itemsByCategory) : []}>
         {Object.entries(itemsByCategory).sort(([a], [b]) => {
           if (a === 'Turno') return -1;
           if (b === 'Turno') return 1;
@@ -203,81 +203,86 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
           const categoryCompletedRequired = categoryItems.filter(item => item.required && item.completed).length;
           
           return (
-            <AccordionItem key={category} value={category} className="border rounded-lg overflow-hidden">
-              <AccordionTrigger className="px-6 hover:no-underline hover:bg-muted/50">
-                <div className="flex items-center justify-between w-full pr-4">
-                  <span className="font-semibold text-lg">{category}</span>
-                  <div className="flex gap-2">
-                    <Badge variant="outline">
+            <AccordionItem key={category} value={category} className="border rounded-lg overflow-hidden shadow-sm">
+              <AccordionTrigger className="px-3 py-2.5 hover:no-underline hover:bg-muted/50">
+                <div className="flex items-center justify-between w-full pr-2">
+                  <span className="font-semibold text-sm">{category}</span>
+                  <div className="flex gap-1.5">
+                    <Badge variant="outline" className="text-xs">
                       {categoryCompleted}/{categoryTotal}
                     </Badge>
                     {categoryRequired > 0 && (
-                      <Badge className={categoryCompletedRequired === categoryRequired ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
-                        {categoryCompletedRequired}/{categoryRequired} obbligatori
+                      <Badge className={categoryCompletedRequired === categoryRequired ? 'bg-success text-success-foreground text-xs' : 'bg-warning text-warning-foreground text-xs'}>
+                        {categoryCompletedRequired}/{categoryRequired} obb.
                       </Badge>
                     )}
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6 pt-2">
-                <div className="space-y-4">
+              <AccordionContent className="px-3 pb-3 pt-1">
+                <div className="space-y-2">
                   {categoryItems.map((item) => (
-                    <div key={item.id} className="border rounded-lg p-4 space-y-3">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-3">
-                            <p className="font-medium">{item.description}</p>
-                            {item.required && (
-                              <Badge variant="outline" className="text-xs">
-                                Obbligatorio
-                              </Badge>
-                            )}
-                            {item.value && (
-                              <Badge className={item.value === 'si' ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}>
-                                {item.value.toUpperCase()}
-                              </Badge>
+                    <div key={item.id} className="border rounded p-2 space-y-2 bg-card">
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1 space-y-2">
+                          {/* Header con descrizione e controllo SI/NO inline */}
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 flex-1">
+                              <p className="font-medium text-sm">{item.description}</p>
+                              {item.required && (
+                                <Badge variant="outline" className="text-[10px] px-1 py-0">
+                                  OBB
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* Switch SI/NO inline per categorie diverse da Turno */}
+                            {item.category !== 'Turno' && (
+                              <div className="flex items-center gap-2 shrink-0">
+                                <Label 
+                                  htmlFor={`switch-${item.id}`} 
+                                  className={`text-xs font-semibold cursor-pointer transition-colors ${
+                                    item.value === 'si' ? 'text-success' : item.value === 'no' ? 'text-destructive' : 'text-muted-foreground'
+                                  }`}
+                                >
+                                  {item.value === 'si' ? (
+                                    <span className="flex items-center gap-1">
+                                      <Check className="h-3 w-3" /> SÌ
+                                    </span>
+                                  ) : item.value === 'no' ? (
+                                    <span className="flex items-center gap-1">
+                                      <X className="h-3 w-3" /> NO
+                                    </span>
+                                  ) : (
+                                    'SI/NO'
+                                  )}
+                                </Label>
+                                <Switch
+                                  id={`switch-${item.id}`}
+                                  checked={item.value === 'si'}
+                                  onCheckedChange={(checked) => updateItem(item.id, { value: checked ? 'si' : 'no' })}
+                                  disabled={isCompleted}
+                                  className="data-[state=checked]:bg-success"
+                                />
+                              </div>
                             )}
                           </div>
                           
-                          {/* Radio buttons SI/NO solo per categorie diverse da Turno */}
-                          {item.category !== 'Turno' && (
-                            <RadioGroup 
-                              value={item.value || ''} 
-                              onValueChange={(value) => updateItem(item.id, { value: value as 'si' | 'no' })}
-                              className="flex gap-6 mb-3"
-                              disabled={isCompleted}
-                            >
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="si" id={`${item.id}-si`} disabled={isCompleted} />
-                                <Label htmlFor={`${item.id}-si`} className="text-success font-medium cursor-pointer">
-                                  SÌ
-                                </Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="no" id={`${item.id}-no`} disabled={isCompleted} />
-                                <Label htmlFor={`${item.id}-no`} className="text-destructive font-medium cursor-pointer">
-                                  NO
-                                </Label>
-                              </div>
-                            </RadioGroup>
-                          )}
-                          
                           {/* Campo per selezione operatore per categoria Turno */}
                           {item.category === 'Turno' && (
-                            <div className="mb-3">
-                              <Label className="text-sm font-medium mb-2 block">Operatore:</Label>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-medium">Operatore:</Label>
                               <Select
                                 value={item.assignedTo || ''}
                                 onValueChange={(value) => updateItem(item.id, { assignedTo: value })}
                                 disabled={isCompleted || isLoadingOperators}
                               >
-                                <SelectTrigger className="w-full bg-background">
-                                  <SelectValue placeholder={isLoadingOperators ? "Caricamento..." : "Seleziona operatore..."} />
+                                <SelectTrigger className="w-full h-9 text-sm">
+                                  <SelectValue placeholder={isLoadingOperators ? "Caricamento..." : "Seleziona..."} />
                                 </SelectTrigger>
                                 <SelectContent className="bg-background z-50">
                                   {operators
                                     ?.filter((operator) => {
-                                      // Filtra in base alla descrizione dell'item
                                       if (item.description === 'Autista') {
                                         return operator.role.toLowerCase() === 'autista';
                                       } else if (item.description === 'Soccorritore') {
@@ -298,13 +303,13 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                           {/* Campo per inserimento nome per task di pulizia */}
                           {(item.category === 'Pulizia Ambulanza Eseguita Da' || 
                             item.category === 'Carrozzeria') && (
-                            <div className="mb-3">
-                              <Label className="text-sm font-medium mb-2 block">Nome:</Label>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-medium">Nome:</Label>
                               <Input
                                 placeholder="Inserisci nome..."
                                 value={item.assignedTo || ''}
                                 onChange={(e) => updateItem(item.id, { assignedTo: e.target.value })}
-                                className="w-full"
+                                className="h-9 text-sm"
                                 disabled={isCompleted}
                                 maxLength={100}
                               />
@@ -313,8 +318,8 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                           
                           {/* Campo firma per categoria Turno */}
                           {item.category === 'Turno' && (
-                            <div className="mb-3">
-                              <Label className="text-sm font-medium mb-2 block">Firma:</Label>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-medium">Firma:</Label>
                               <SignaturePad
                                 value={item.signature}
                                 onChange={(signature) => updateItem(item.id, { signature })}
@@ -323,11 +328,12 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                             </div>
                           )}
                           
+                          {/* Note sempre presenti ma compatte */}
                           <Textarea
-                            placeholder="Note aggiuntive (opzionale)"
+                            placeholder="Note (opzionale)"
                             value={item.notes || ''}
                             onChange={(e) => updateItem(item.id, { notes: e.target.value })}
-                            className="min-h-[60px]"
+                            className="min-h-[50px] text-sm"
                             disabled={isCompleted}
                             maxLength={2000}
                           />
@@ -344,25 +350,27 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
 
       {!isCompleted && (
         <div 
-          className="fixed bottom-0 left-0 right-0 w-full bg-background border-t px-4 pt-4 flex gap-3 z-10"
-          style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}
+          className="fixed bottom-0 left-0 right-0 w-full bg-background border-t px-3 py-2 flex gap-2 z-10 shadow-lg"
+          style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
         >
           <Button 
             onClick={handleComplete}
             disabled={completedRequired < requiredCount || isSaving}
-            className="flex-1 bg-success text-success-foreground hover:bg-success/90"
+            className="flex-1 bg-success text-success-foreground hover:bg-success/90 h-9"
+            size="sm"
           >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            {isSaving ? 'Salvataggio...' : 'Completa Checklist'}
+            <CheckCircle className="h-4 w-4 mr-1.5" />
+            {isSaving ? 'Salvataggio...' : 'Completa'}
           </Button>
           <Button 
             variant="outline" 
-            className="gap-2" 
+            className="gap-1.5 h-9" 
             onClick={handleSave}
             disabled={isSaving}
+            size="sm"
           >
             <Save className="h-4 w-4" />
-            {isSaving ? 'Salvataggio...' : 'Salva'}
+            {isSaving ? 'Salva...' : 'Salva'}
           </Button>
         </div>
       )}
