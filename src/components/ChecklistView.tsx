@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,25 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
   const [items, setItems] = useState<ChecklistItem[]>(checklist.items);
   const isCompleted = checklist.status === 'completed';
   const { data: operators, isLoading: isLoadingOperators } = useOperators();
+
+  // Pre-compila tutti i campi con "SI" di default al caricamento
+  useEffect(() => {
+    if (!isCompleted) {
+      setItems(prevItems => 
+        prevItems.map(item => {
+          // Solo per item con SI/NO (non categoria Turno) e senza valore già impostato
+          if (item.category !== 'Turno' && (item.value === null || item.value === undefined)) {
+            return { 
+              ...item, 
+              value: 'si',
+              completed: true 
+            };
+          }
+          return item;
+        })
+      );
+    }
+  }, [isCompleted]);
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
     if (isCompleted) return; // Prevent updates if checklist is completed
