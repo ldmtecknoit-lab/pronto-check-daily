@@ -49,25 +49,19 @@ export default function Dashboard() {
   const { data: monthlyImage } = useMonthlyShiftImage(currentMonth, currentYear);
   const { data: currentVersion } = useCurrentAppVersion();
 
-  const checkForUpdates = () => {
-    if (!currentVersion) {
-      toast.error('Impossibile controllare gli aggiornamenti');
-      return;
-    }
+  // Controllo automatico aggiornamenti all'avvio
+  useEffect(() => {
+    if (!currentVersion) return;
     
-    // Get installed version from localStorage
     const installedVersion = localStorage.getItem('app_installed_version') || '1.0.0';
     
-    // Compare versions (simple string comparison, works for semantic versioning)
+    // Confronta versioni
     if (currentVersion.version > installedVersion) {
-      toast.info('Nuovo aggiornamento disponibile!');
       setLatestVersion(currentVersion.version);
       setUpdateAvailable(true);
       setShowUpdateDialog(true);
-    } else {
-      toast.success('App già aggiornata!');
     }
-  };
+  }, [currentVersion]);
 
   const downloadApk = () => {
     if (!currentVersion?.apk_url) {
@@ -249,14 +243,6 @@ export default function Dashboard() {
           <History className="h-4 w-4" />
           Visualizza Storico
         </Button>
-        <Button
-          variant="outline"
-          onClick={checkForUpdates}
-          className="gap-2 flex-1 min-w-[200px]"
-        >
-          <Download className="h-4 w-4" />
-          Controlla Aggiornamenti
-        </Button>
       </div>
 
       {/* Shifts Grid */}
@@ -387,13 +373,13 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Update Available Dialog */}
-      <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
-        <DialogContent>
+      {/* Update Required Dialog - Blocca l'uso dell'app */}
+      <Dialog open={showUpdateDialog} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>Aggiornamento Disponibile</DialogTitle>
+            <DialogTitle>Aggiornamento Obbligatorio</DialogTitle>
             <DialogDescription>
-              È disponibile una nuova versione dell'app ({latestVersion}).
+              È disponibile una nuova versione dell'app ({latestVersion}). Devi aggiornare per continuare ad utilizzare l'app.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -403,17 +389,14 @@ export default function Dashboard() {
                 <p className="text-sm text-muted-foreground">{currentVersion.release_notes}</p>
               </div>
             )}
-            <p className="text-sm text-muted-foreground">
-              Scarica l'ultima versione per accedere alle nuove funzionalità e miglioramenti.
+            <p className="text-sm text-destructive font-medium">
+              L'app non può essere utilizzata senza l'aggiornamento.
             </p>
           </div>
-          <DialogFooter className="flex gap-2">
-            <Button variant="outline" onClick={() => setShowUpdateDialog(false)}>
-              Più Tardi
-            </Button>
-            <Button onClick={downloadApk}>
+          <DialogFooter>
+            <Button onClick={downloadApk} className="w-full">
               <Download className="mr-2 h-4 w-4" />
-              Scarica APK
+              Scarica Aggiornamento
             </Button>
           </DialogFooter>
         </DialogContent>
