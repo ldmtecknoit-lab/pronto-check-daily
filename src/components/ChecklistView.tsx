@@ -28,20 +28,31 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
   const isCompleted = checklist.status === 'completed';
   const { data: operators, isLoading: isLoadingOperators } = useOperators();
 
-  // Pre-compila tutti i campi con "SI" di default al caricamento
+  // Pre-compila tutti i campi di default al caricamento
   useEffect(() => {
     if (!isCompleted) {
       setItems(prevItems => 
         prevItems.map(item => {
-          // Solo per item con SI/NO (non categoria Turno) e senza valore già impostato
-          if (item.category !== 'Turno' && (item.value === null || item.value === undefined)) {
+          // Skip se già ha un valore o è categoria Turno
+          if (item.category === 'Turno' || (item.value !== null && item.value !== undefined)) {
+            return item;
+          }
+          
+          // Per campi con slider, imposta valore a 50 (1/2)
+          if (shouldUseSlider(item.description)) {
             return { 
               ...item, 
-              value: 'si',
+              value: '50',
               completed: true 
             };
           }
-          return item;
+          
+          // Per campi SI/NO normali, imposta a SI
+          return { 
+            ...item, 
+            value: 'si',
+            completed: true 
+          };
         })
       );
     }
@@ -319,11 +330,11 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                           
                           {/* Slider per campi con livelli (ossigeno, carburante, liquidi) */}
                           {item.category !== 'Turno' && shouldUseSlider(item.description) && (
-                            <div className="space-y-1.5">
+                            <div className="space-y-2 mt-2">
                               <div className="flex items-center justify-between">
                                 <Label className="text-xs font-medium">Livello:</Label>
-                                <span className="text-xs font-semibold text-primary">
-                                  {item.value ? getSliderLabel(Number(item.value)) : 'Non impostato'}
+                                <span className="text-sm font-bold text-primary">
+                                  {getSliderLabel(Number(item.value) || 50)}
                                 </span>
                               </div>
                               <Slider
@@ -335,7 +346,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                                 disabled={isCompleted}
                                 className="w-full"
                               />
-                              <div className="flex justify-between text-[10px] text-muted-foreground px-1">
+                              <div className="flex justify-between text-[10px] text-muted-foreground">
                                 <span>Vuoto</span>
                                 <span>1/4</span>
                                 <span>1/2</span>
