@@ -334,11 +334,11 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                               <div className="flex items-center justify-between">
                                 <Label className="text-xs font-medium">Livello:</Label>
                                 <span className="text-sm font-bold text-primary">
-                                  {getSliderLabel(Number(item.value) || 50)}
+                                  {getSliderLabel(item.value !== null && item.value !== undefined ? Number(item.value) : 50)}
                                 </span>
                               </div>
                               <Slider
-                                value={[Number(item.value) || 50]}
+                                value={[item.value !== null && item.value !== undefined ? Number(item.value) : 50]}
                                 onValueChange={(values) => updateItem(item.id, { value: String(values[0]) })}
                                 min={0}
                                 max={100}
