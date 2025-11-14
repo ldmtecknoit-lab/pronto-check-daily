@@ -62,7 +62,8 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
   const shouldUseSlider = (description: string): boolean => {
     const sliderKeywords = [
       'ossigeno', 'carburante', 'benzina', 'diesel', 'gasolio',
-      'olio', 'liquido', 'acqua', 'radiatore', 'freni', 'tergicristalli'
+      'olio', 'liquido', 'acqua', 'radiatore', 'freni', 'tergicristalli',
+      'bombola', 'bombole'
     ];
     return sliderKeywords.some(keyword => description.toLowerCase().includes(keyword));
   };
