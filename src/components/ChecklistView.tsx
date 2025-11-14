@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import { ArrowLeft, Save, CheckCircle, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { DailyChecklist, ChecklistItem } from '@/types/ambulance';
@@ -45,6 +46,25 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
       );
     }
   }, [isCompleted]);
+
+  // Determina se un item deve usare uno slider
+  const shouldUseSlider = (description: string): boolean => {
+    const sliderKeywords = [
+      'ossigeno', 'carburante', 'benzina', 'diesel', 'gasolio',
+      'olio', 'liquido', 'acqua', 'radiatore', 'freni', 'tergicristalli'
+    ];
+    return sliderKeywords.some(keyword => description.toLowerCase().includes(keyword));
+  };
+
+  // Converte il valore dello slider in etichetta
+  const getSliderLabel = (value: number): string => {
+    if (value === 0) return 'Vuoto';
+    if (value === 25) return '1/4';
+    if (value === 50) return '1/2';
+    if (value === 75) return '3/4';
+    if (value === 100) return 'Pieno';
+    return `${value}%`;
+  };
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
     if (isCompleted) return; // Prevent updates if checklist is completed
@@ -84,7 +104,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
         if (item.category === 'Turno') {
           updatedItem.completed = !!(updatedItem.assignedTo && updatedItem.signature);
         } else {
-          // Per altre categorie, completare quando c'è un valore SI/NO
+          // Per altre categorie, completare quando c'è un valore (SI/NO o slider)
           updatedItem.completed = updates.value !== undefined ? updates.value !== null : item.completed;
         }
         
@@ -255,37 +275,75 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
                               )}
                             </div>
                             
-                            {/* Switch SI/NO inline per categorie diverse da Turno */}
+                            {/* Controlli per categorie diverse da Turno */}
                             {item.category !== 'Turno' && (
-                              <div className="flex items-center gap-2 shrink-0">
-                                <Label 
-                                  htmlFor={`switch-${item.id}`} 
-                                  className={`text-xs font-semibold cursor-pointer transition-colors ${
-                                    item.value === 'si' ? 'text-success' : item.value === 'no' ? 'text-destructive' : 'text-muted-foreground'
-                                  }`}
-                                >
-                                  {item.value === 'si' ? (
-                                    <span className="flex items-center gap-1">
-                                      <Check className="h-3 w-3" /> SÌ
-                                    </span>
-                                  ) : item.value === 'no' ? (
-                                    <span className="flex items-center gap-1">
-                                      <X className="h-3 w-3" /> NO
-                                    </span>
-                                  ) : (
-                                    'SI/NO'
-                                  )}
-                                </Label>
-                                <Switch
-                                  id={`switch-${item.id}`}
-                                  checked={item.value === 'si'}
-                                  onCheckedChange={(checked) => updateItem(item.id, { value: checked ? 'si' : 'no' })}
-                                  disabled={isCompleted}
-                                  className="data-[state=checked]:bg-success"
-                                />
-                              </div>
+                              <>
+                                {shouldUseSlider(item.description) ? (
+                                  <div className="flex items-center gap-2 shrink-0 min-w-[140px]">
+                                    <Label className="text-xs font-semibold whitespace-nowrap">
+                                      {item.value ? getSliderLabel(Number(item.value)) : 'N/D'}
+                                    </Label>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <Label 
+                                      htmlFor={`switch-${item.id}`} 
+                                      className={`text-xs font-semibold cursor-pointer transition-colors ${
+                                        item.value === 'si' ? 'text-success' : item.value === 'no' ? 'text-destructive' : 'text-muted-foreground'
+                                      }`}
+                                    >
+                                      {item.value === 'si' ? (
+                                        <span className="flex items-center gap-1">
+                                          <Check className="h-3 w-3" /> SÌ
+                                        </span>
+                                      ) : item.value === 'no' ? (
+                                        <span className="flex items-center gap-1">
+                                          <X className="h-3 w-3" /> NO
+                                        </span>
+                                      ) : (
+                                        'SI/NO'
+                                      )}
+                                    </Label>
+                                    <Switch
+                                      id={`switch-${item.id}`}
+                                      checked={item.value === 'si'}
+                                      onCheckedChange={(checked) => updateItem(item.id, { value: checked ? 'si' : 'no' })}
+                                      disabled={isCompleted}
+                                      className="data-[state=checked]:bg-success"
+                                    />
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
+                          
+                          {/* Slider per campi con livelli (ossigeno, carburante, liquidi) */}
+                          {item.category !== 'Turno' && shouldUseSlider(item.description) && (
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-xs font-medium">Livello:</Label>
+                                <span className="text-xs font-semibold text-primary">
+                                  {item.value ? getSliderLabel(Number(item.value)) : 'Non impostato'}
+                                </span>
+                              </div>
+                              <Slider
+                                value={[Number(item.value) || 50]}
+                                onValueChange={(values) => updateItem(item.id, { value: String(values[0]) })}
+                                min={0}
+                                max={100}
+                                step={25}
+                                disabled={isCompleted}
+                                className="w-full"
+                              />
+                              <div className="flex justify-between text-[10px] text-muted-foreground px-1">
+                                <span>Vuoto</span>
+                                <span>1/4</span>
+                                <span>1/2</span>
+                                <span>3/4</span>
+                                <span>Pieno</span>
+                              </div>
+                            </div>
+                          )}
                           
                           {/* Campo per selezione operatore per categoria Turno */}
                           {item.category === 'Turno' && (
