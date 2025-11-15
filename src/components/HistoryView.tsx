@@ -34,8 +34,9 @@ export default function HistoryView({ history, onBack, onViewChecklist }: Histor
   };
 
   const getCompletionStats = (checklist: DailyChecklist) => {
-    const completed = checklist.items.filter(item => item.completed).length;
-    const total = checklist.items.length;
+    const items = checklist.items || [];
+    const completed = items.filter(item => item.completed).length;
+    const total = items.length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
     return { completed, total, percentage };
   };

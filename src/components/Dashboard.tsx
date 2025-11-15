@@ -29,7 +29,7 @@ export default function Dashboard() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [latestVersion, setLatestVersion] = useState('');
   const { data: todayChecklists } = useTodayChecklists();
-  const { data: allChecklists } = useChecklists();
+  const { data: allChecklists, refetch: refetchAllChecklists } = useChecklists();
   const { data: currentChecklist } = useChecklist(selectedChecklistId);
   const { getOrCreateChecklist, isCreating } = useGetOrCreateChecklist();
   const updateChecklist = useUpdateChecklist();
@@ -237,7 +237,10 @@ export default function Dashboard() {
         </Button>
         <Button
           variant="outline"
-          onClick={() => setCurrentView('history')}
+          onClick={() => {
+            refetchAllChecklists();
+            setCurrentView('history');
+          }}
           className="gap-2 flex-1 min-w-[200px]"
         >
           <History className="h-4 w-4" />
