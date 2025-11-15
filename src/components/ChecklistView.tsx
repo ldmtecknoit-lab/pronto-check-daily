@@ -60,12 +60,19 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
 
   // Determina se un item deve usare uno slider
   const shouldUseSlider = (description: string): boolean => {
+    const lowerDesc = description.toLowerCase();
+    
+    // Escludi esplicitamente acqua ossigenata
+    if (lowerDesc.includes('acqua ossigenata')) {
+      return false;
+    }
+    
     const sliderKeywords = [
       'ossigeno', 'carburante', 'benzina', 'diesel', 'gasolio',
       'olio', 'liquido', 'acqua', 'radiatore', 'freni', 'tergicristalli',
       'bombola', 'bombole'
     ];
-    return sliderKeywords.some(keyword => description.toLowerCase().includes(keyword));
+    return sliderKeywords.some(keyword => lowerDesc.includes(keyword));
   };
 
   // Converte il valore dello slider in etichetta
