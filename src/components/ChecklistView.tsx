@@ -25,38 +25,47 @@ interface ChecklistViewProps {
 
 export default function ChecklistView({ checklist, onSave, onBack, isSaving }: ChecklistViewProps) {
   const [items, setItems] = useState<ChecklistItem[]>(checklist.items);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const isCompleted = checklist.status === 'completed';
   const { data: operators, isLoading: isLoadingOperators } = useOperators();
 
   // Pre-compila tutti i campi di default al caricamento
   useEffect(() => {
-    if (!isCompleted) {
-      setItems(prevItems => 
-        prevItems.map(item => {
-          // Skip se già ha un valore o è categoria Turno
-          if (item.category === 'Turno' || (item.value !== null && item.value !== undefined)) {
-            return item;
-          }
-          
-          // Per campi con slider, imposta valore a 50 (1/2)
-          if (shouldUseSlider(item.description)) {
+    if (!isCompleted && !hasInitialized && items.length > 0) {
+      const needsInitialization = items.some(item => 
+        item.category !== 'Turno' && 
+        (item.value === null || item.value === undefined)
+      );
+
+      if (needsInitialization) {
+        setItems(prevItems => 
+          prevItems.map(item => {
+            // Skip se già ha un valore o è categoria Turno
+            if (item.category === 'Turno' || (item.value !== null && item.value !== undefined)) {
+              return item;
+            }
+            
+            // Per campi con slider, imposta valore a 50 (1/2)
+            if (shouldUseSlider(item.description)) {
+              return { 
+                ...item, 
+                value: '50',
+                completed: true 
+              };
+            }
+            
+            // Per campi SI/NO normali, imposta a SI
             return { 
               ...item, 
-              value: '50',
+              value: 'si',
               completed: true 
             };
-          }
-          
-          // Per campi SI/NO normali, imposta a SI
-          return { 
-            ...item, 
-            value: 'si',
-            completed: true 
-          };
-        })
-      );
+          })
+        );
+        setHasInitialized(true);
+      }
     }
-  }, [isCompleted]);
+  }, [isCompleted, items.length, hasInitialized]);
 
   // Determina se un item deve usare uno slider
   const shouldUseSlider = (description: string): boolean => {
