@@ -7,7 +7,7 @@ export interface ChecklistItem {
   completed: boolean;
   required: boolean;
   notes?: string;
-  value?: 'si' | 'no' | string | null; // Supports SI/NO or slider values (0-100)
+  value?: 'si' | 'no' | null;
   assignedTo?: string; // For names in cleaning tasks
   signature?: string; // Base64 signature data
 }
