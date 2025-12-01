@@ -8,6 +8,8 @@ import { CHECKLIST_TEMPLATE } from '@/types/ambulance';
 export const useChecklists = (startDate?: string, endDate?: string) => {
   return useQuery({
     queryKey: ['checklists', startDate, endDate],
+    staleTime: 0, // Always refetch
+    gcTime: 0, // Don't cache
     queryFn: async () => {
       let checklistQuery = supabase
         .from('checklists')
@@ -26,12 +28,13 @@ export const useChecklists = (startDate?: string, endDate?: string) => {
 
       const ids = checklistRows.map((c: any) => c.id);
 
-      // Fetch all items for these checklists
+      // Fetch all items for these checklists with higher limit
       const { data: itemRows, error: itemsError } = await supabase
         .from('checklist_items')
         .select('*')
         .in('checklist_id', ids)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .limit(20000); // Increase limit to handle many checklists
 
       if (itemsError) throw itemsError;
 
@@ -74,6 +77,8 @@ export const useChecklists = (startDate?: string, endDate?: string) => {
 export const useChecklist = (checklistId: string | null) => {
   return useQuery({
     queryKey: ['checklist', checklistId],
+    staleTime: 0, // Always refetch
+    gcTime: 0, // Don't cache
     queryFn: async () => {
       if (!checklistId) return null;
 
