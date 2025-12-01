@@ -24,27 +24,41 @@ interface ChecklistViewProps {
 
 export default function ChecklistView({ checklist, onSave, onBack, isSaving }: ChecklistViewProps) {
   const [items, setItems] = useState<ChecklistItem[]>(checklist.items);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const isCompleted = checklist.status === 'completed';
   const { data: operators, isLoading: isLoadingOperators } = useOperators();
 
+  // Sincronizza items quando cambiano nelle props
+  useEffect(() => {
+    setItems(checklist.items);
+    setHasInitialized(false);
+  }, [checklist.id]);
+
   // Pre-compila tutti i campi con "SI" di default al caricamento
   useEffect(() => {
-    if (!isCompleted) {
-      setItems(prevItems => 
-        prevItems.map(item => {
-          // Solo per item con SI/NO (non categoria Turno) e senza valore già impostato
-          if (item.category !== 'Turno' && (item.value === null || item.value === undefined)) {
-            return { 
-              ...item, 
-              value: 'si',
-              completed: true 
-            };
-          }
-          return item;
-        })
+    if (!isCompleted && !hasInitialized && items.length > 0) {
+      const needsInitialization = items.some(
+        item => item.category !== 'Turno' && (item.value === null || item.value === undefined)
       );
+      
+      if (needsInitialization) {
+        setItems(prevItems => 
+          prevItems.map(item => {
+            // Solo per item con SI/NO (non categoria Turno) e senza valore già impostato
+            if (item.category !== 'Turno' && (item.value === null || item.value === undefined)) {
+              return { 
+                ...item, 
+                value: 'si',
+                completed: true 
+              };
+            }
+            return item;
+          })
+        );
+        setHasInitialized(true);
+      }
     }
-  }, [isCompleted]);
+  }, [isCompleted, items.length, hasInitialized]);
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
     if (isCompleted) return; // Prevent updates if checklist is completed
