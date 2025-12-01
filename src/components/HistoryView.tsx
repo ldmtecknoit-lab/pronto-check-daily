@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,13 @@ const SHIFT_LABELS = {
 };
 
 export default function HistoryView({ onBack, onViewChecklist }: HistoryViewProps) {
-  const { data: allChecklists, isLoading } = useChecklists();
+  const { data: allChecklists, isLoading, refetch } = useChecklists();
+  
+  // Forza il refetch quando il componente viene montato
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+  
   const history = allChecklists || [];
   
   const sortedHistory = [...history].sort((a, b) => 

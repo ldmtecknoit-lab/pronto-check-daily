@@ -190,28 +190,41 @@ export const useUpdateChecklist = () => {
         .update(checklistUpdate)
         .eq('id', checklist.id);
 
-      if (checklistError) throw checklistError;
+      if (checklistError) {
+        console.error('Error updating checklist:', checklistError);
+        throw checklistError;
+      }
 
-      // Update all checklist items
-      for (const item of checklist.items) {
-        const { error: itemError } = await supabase
-          .from('checklist_items')
-          .update({
-            completed: item.completed,
-            notes: item.notes || '',
-            value: item.value,
-            assigned_to: item.assignedTo || '',
-            signature: item.signature || '',
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', item.id);
+      // Update all checklist items in batch
+      if (checklist.items && checklist.items.length > 0) {
+        const updatePromises = checklist.items.map(item => 
+          supabase
+            .from('checklist_items')
+            .update({
+              completed: item.completed,
+              notes: item.notes || '',
+              value: item.value,
+              assigned_to: item.assignedTo || '',
+              signature: item.signature || '',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', item.id)
+        );
 
-        if (itemError) throw itemError;
+        const results = await Promise.all(updatePromises);
+        
+        // Check for errors
+        const errors = results.filter(r => r.error);
+        if (errors.length > 0) {
+          console.error('Errors updating items:', errors);
+          throw new Error(`Failed to update ${errors.length} items`);
+        }
       }
 
       return checklist;
     },
     onSuccess: () => {
+      // Invalida tutte le query relative alle checklist per forzare il refetch
       queryClient.invalidateQueries({ queryKey: ['checklists'] });
       queryClient.invalidateQueries({ queryKey: ['checklist'] });
     }
