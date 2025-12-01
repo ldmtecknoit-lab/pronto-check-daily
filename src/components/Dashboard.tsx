@@ -131,7 +131,6 @@ export default function Dashboard() {
   if (currentView === 'history') {
     return (
       <HistoryView
-        history={allChecklists || []}
         onBack={() => setCurrentView('dashboard')}
         onViewChecklist={handleViewFromHistory}
       />
