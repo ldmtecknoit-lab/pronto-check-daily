@@ -3,9 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, Clock, User, FileText } from 'lucide-react';
 import type { DailyChecklist } from '@/types/ambulance';
+import { useChecklists } from '@/hooks/useChecklists';
 
 interface HistoryViewProps {
-  history: DailyChecklist[];
   onBack: () => void;
   onViewChecklist: (checklist: DailyChecklist) => void;
 }
@@ -15,7 +15,10 @@ const SHIFT_LABELS = {
   notte: 'Turno Notte'
 };
 
-export default function HistoryView({ history, onBack, onViewChecklist }: HistoryViewProps) {
+export default function HistoryView({ onBack, onViewChecklist }: HistoryViewProps) {
+  const { data: allChecklists, isLoading } = useChecklists();
+  const history = allChecklists || [];
+  
   const sortedHistory = [...history].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
@@ -34,11 +37,31 @@ export default function HistoryView({ history, onBack, onViewChecklist }: Histor
   };
 
   const getCompletionStats = (checklist: DailyChecklist) => {
-    const completed = checklist.items.filter(item => item.completed).length;
-    const total = checklist.items.length;
+    const items = checklist.items || [];
+    const completed = items.filter(item => item.completed).length;
+    const total = items.length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
     return { completed, total, percentage };
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" onClick={onBack} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Torna alla Dashboard
+          </Button>
+        </div>
+        
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground">Caricamento storico...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (history.length === 0) {
     return (
