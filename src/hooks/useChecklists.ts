@@ -179,6 +179,10 @@ export const useUpdateChecklist = () => {
 
   return useMutation({
     mutationFn: async (checklist: DailyChecklist) => {
+      console.log('=== SAVING CHECKLIST ===');
+      console.log('Checklist ID:', checklist.id);
+      console.log('Items count:', checklist.items?.length);
+      
       // Update checklist header
       const checklistUpdate: any = {
         status: checklist.status,
@@ -196,40 +200,49 @@ export const useUpdateChecklist = () => {
         .eq('id', checklist.id);
 
       if (checklistError) {
-        console.error('Error updating checklist:', checklistError);
+        console.error('Error updating checklist header:', checklistError);
         throw checklistError;
       }
 
-      // Update all checklist items in batch
+      // Update all checklist items one by one (more reliable than batch)
       if (checklist.items && checklist.items.length > 0) {
-        const updatePromises = checklist.items.map(item => 
-          supabase
-            .from('checklist_items')
-            .update({
-              completed: item.completed,
-              notes: item.notes || '',
-              value: item.value,
-              assigned_to: item.assignedTo || '',
-              signature: item.signature || '',
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', item.id)
-        );
-
-        const results = await Promise.all(updatePromises);
+        let successCount = 0;
+        let errorCount = 0;
         
-        // Check for errors
-        const errors = results.filter(r => r.error);
-        if (errors.length > 0) {
-          console.error('Errors updating items:', errors);
-          throw new Error(`Failed to update ${errors.length} items`);
+        for (const item of checklist.items) {
+          const updateData = {
+            completed: item.completed,
+            notes: item.notes || '',
+            value: item.value,
+            assigned_to: item.assignedTo || '',
+            signature: item.signature || '',
+            updated_at: new Date().toISOString()
+          };
+          
+          const { error: itemError } = await supabase
+            .from('checklist_items')
+            .update(updateData)
+            .eq('id', item.id);
+
+          if (itemError) {
+            console.error(`Error updating item ${item.id} (${item.description}):`, itemError);
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        }
+        
+        console.log(`Updated ${successCount}/${checklist.items.length} items, ${errorCount} errors`);
+        
+        if (errorCount > 0) {
+          throw new Error(`Failed to update ${errorCount} items`);
         }
       }
 
+      console.log('=== SAVE COMPLETE ===');
       return checklist;
     },
     onSuccess: () => {
-      // Invalida tutte le query relative alle checklist per forzare il refetch
       queryClient.invalidateQueries({ queryKey: ['checklists'] });
       queryClient.invalidateQueries({ queryKey: ['checklist'] });
     }
