@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -23,45 +23,46 @@ interface ChecklistViewProps {
 }
 
 export default function ChecklistView({ checklist, onSave, onBack, isSaving }: ChecklistViewProps) {
-  const [items, setItems] = useState<ChecklistItem[]>(checklist.items);
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const [items, setItems] = useState<ChecklistItem[]>([]);
+  const initializedChecklistId = useRef<string | null>(null);
   const isCompleted = checklist.status === 'completed';
   const { data: operators, isLoading: isLoadingOperators } = useOperators();
 
-  // Sincronizza items quando cambiano nelle props
+  // Inizializza items SOLO quando cambia la checklist
   useEffect(() => {
-    setItems(checklist.items);
-    setHasInitialized(false);
-  }, [checklist.id]);
-
-  // Pre-compila tutti i campi con "SI" di default al caricamento
-  useEffect(() => {
-    if (!isCompleted && !hasInitialized && items.length > 0) {
-      const needsInitialization = items.some(
-        item => item.category !== 'Turno' && (item.value === null || item.value === undefined)
-      );
-      
-      if (needsInitialization) {
-        setItems(prevItems => 
-          prevItems.map(item => {
-            // Solo per item con SI/NO (non categoria Turno) e senza valore già impostato
-            if (item.category !== 'Turno' && (item.value === null || item.value === undefined)) {
-              return { 
-                ...item, 
-                value: 'si',
-                completed: true 
-              };
-            }
-            return item;
-          })
-        );
-        setHasInitialized(true);
-      }
+    // Evita re-inizializzazione per la stessa checklist
+    if (initializedChecklistId.current === checklist.id) {
+      return;
     }
-  }, [isCompleted, items.length, hasInitialized]);
+    
+    initializedChecklistId.current = checklist.id;
+    
+    // Verifica se è una checklist NUOVA (tutti i valori sono null per item non-Turno)
+    const isNewChecklist = checklist.items.every(item => 
+      item.category === 'Turno' || item.value === null || item.value === undefined
+    );
+    
+    if (isNewChecklist && !isCompleted) {
+      // Pre-compila con "SI" solo per checklist nuove
+      const prefilledItems = checklist.items.map(item => {
+        if (item.category !== 'Turno' && (item.value === null || item.value === undefined)) {
+          return { 
+            ...item, 
+            value: 'si' as const,
+            completed: true 
+          };
+        }
+        return item;
+      });
+      setItems(prefilledItems);
+    } else {
+      // Usa i valori esistenti dal database
+      setItems(checklist.items);
+    }
+  }, [checklist.id, checklist.items, isCompleted]);
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
-    if (isCompleted) return; // Prevent updates if checklist is completed
+    if (isCompleted) return;
     
     // Validate inputs before updating
     if (updates.notes !== undefined && updates.notes) {
@@ -99,7 +100,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
           updatedItem.completed = !!(updatedItem.assignedTo && updatedItem.signature);
         } else {
           // Per altre categorie, completare quando c'è un valore SI/NO
-          updatedItem.completed = updates.value !== undefined ? updates.value !== null : item.completed;
+          updatedItem.completed = updatedItem.value !== null && updatedItem.value !== undefined;
         }
         
         return updatedItem;
@@ -122,11 +123,28 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
 
   const handleSave = async () => {
     const status = calculateStatus();
+    
+    // Crea una copia profonda degli items per il salvataggio
+    const itemsToSave = items.map(item => ({
+      ...item,
+      value: item.value,
+      completed: item.completed,
+      notes: item.notes || '',
+      assignedTo: item.assignedTo || '',
+      signature: item.signature || ''
+    }));
+    
     const updatedChecklist: DailyChecklist = {
       ...checklist,
-      items,
+      items: itemsToSave,
       status
     };
+
+    console.log('Saving checklist with items:', itemsToSave.slice(0, 5).map(i => ({ 
+      desc: i.description, 
+      value: i.value, 
+      completed: i.completed 
+    })));
 
     await onSave(updatedChecklist);
     
@@ -149,9 +167,18 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
       return;
     }
 
+    const itemsToSave = items.map(item => ({
+      ...item,
+      value: item.value,
+      completed: item.completed,
+      notes: item.notes || '',
+      assignedTo: item.assignedTo || '',
+      signature: item.signature || ''
+    }));
+
     const completedChecklist: DailyChecklist = {
       ...checklist,
-      items,
+      items: itemsToSave,
       status: 'completed',
       completedAt: new Date().toISOString(),
       completedBy: 'Operatore'
@@ -218,7 +245,7 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
           <div className="w-full bg-muted rounded-full h-1.5">
             <div 
               className="bg-accent h-1.5 rounded-full transition-all duration-300"
-              style={{ width: `${(completedCount / totalItems) * 100}%` }}
+              style={{ width: `${totalItems > 0 ? (completedCount / totalItems) * 100 : 0}%` }}
             />
           </div>
         </CardContent>
@@ -410,13 +437,12 @@ export default function ChecklistView({ checklist, onSave, onBack, isSaving }: C
       
       {isCompleted && (
         <div 
-          className="fixed bottom-0 left-0 right-0 w-full bg-background border-t p-4 z-10"
-          style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+          className="fixed bottom-0 left-0 right-0 w-full bg-success/10 border-t border-success/30 px-3 py-3 z-10"
+          style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
         >
-          <div className="flex items-center justify-center gap-2 text-success">
-            <CheckCircle className="h-5 w-5" />
-            <span className="font-medium">Checklist completata e salvata - Non modificabile</span>
-          </div>
+          <p className="text-center text-sm text-success font-medium">
+            ✓ Checklist completata il {checklist.completedAt ? new Date(checklist.completedAt).toLocaleString('it-IT') : 'data sconosciuta'}
+          </p>
         </div>
       )}
     </div>
